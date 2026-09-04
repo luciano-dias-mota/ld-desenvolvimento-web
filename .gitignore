@@ -1,0 +1,21 @@
+# Variáveis de ambiente
+.env
+.env.*
+
+# Exceção: permitir o arquivo de exemplo
+!.env.example
+
+# Dependências do Composer
+/vendor/
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# Sistema operacional
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
