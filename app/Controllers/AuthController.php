@@ -16,6 +16,12 @@ class AuthController extends Controller
 
     public function login(): void
     {
+        if (!verify_csrf()) {
+            Session::flash('error', 'Sessão expirada. Recarregue a página e tente novamente.');
+            $this->view('auth/login');
+            return;
+        }
+
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
@@ -35,6 +41,12 @@ class AuthController extends Controller
 
     public function register(): void
     {
+        if (!verify_csrf()) {
+            Session::flash('error', 'Sessão expirada. Recarregue a página e tente novamente.');
+            $this->view('auth/register');
+            return;
+        }
+
         $name = $_POST['name'] ?? '';
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
@@ -73,7 +85,9 @@ class AuthController extends Controller
 
     public function logout(): void
     {
-        Auth::logout();
+        if (verify_csrf()) {
+            Auth::logout();
+        }
         header('Location: /login');
         exit;
     }

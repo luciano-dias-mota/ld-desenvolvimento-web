@@ -1,0 +1,451 @@
+/* ==========================================================================
+   CodeQuest / PHP Quest — design tokens
+   ========================================================================== */
+:root {
+  --bg: #06090C;
+  --panel: #10151C;
+  --panel-raised: #161C25;
+  --line: #1E2630;
+
+  --text: #E7ECF2;
+  --text-muted: #8A97A6;
+
+  --accent: #7C5CFF;
+  --accent-strong: #9B82FF;
+  --accent-soft: rgba(124, 92, 255, 0.14);
+
+  --success: #2FB673;
+  --success-soft: rgba(47, 182, 115, 0.14);
+
+  --danger: #E5484D;
+  --danger-soft: rgba(229, 72, 77, 0.14);
+
+  --gold: #E8A33D;
+  --gold-soft: rgba(232, 163, 61, 0.16);
+
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* ==========================================================================
+   Reset / base
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  color: var(--text);
+}
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.15rem; }
+
+p { margin: 0 0 14px; max-width: 70ch; }
+
+a { color: var(--accent-strong); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; display: block; }
+
+:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================================
+   Utilitários
+   ========================================================================== */
+.text-muted { color: var(--text-muted); }
+.mb-0 { margin-bottom: 0; }
+
+/* ==========================================================================
+   Layout / header / footer
+   ========================================================================== */
+.container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  border-bottom: 1px solid var(--line);
+  padding: 18px 0;
+}
+.header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo:hover { text-decoration: none; }
+
+.spark {
+  color: var(--accent-strong);
+  font-family: var(--font-body);
+}
+
+.header nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.header nav a {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.header nav a:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+
+main.container {
+  flex: 1;
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
+
+.footer {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+  margin-top: auto;
+}
+.footer p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   Alerts (flash messages)
+   ========================================================================== */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+}
+.alert-success {
+  background: var(--success-soft);
+  border-color: rgba(47, 182, 115, 0.35);
+  color: #7CE0AE;
+}
+.alert-error {
+  background: var(--danger-soft);
+  border-color: rgba(229, 72, 77, 0.35);
+  color: #FF9DA0;
+}
+
+/* ==========================================================================
+   Botões
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.94rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .1s ease;
+  text-decoration: none;
+}
+.btn:hover { text-decoration: none; }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-strong); }
+
+.btn-outline { background: transparent; border-color: var(--line); color: var(--text); }
+.btn-outline:hover { border-color: var(--accent-strong); color: var(--accent-strong); }
+
+.btn-success { background: var(--success); color: #05130B; }
+.btn-success:hover { background: #37C982; }
+
+/* ==========================================================================
+   Painéis genéricos
+   ========================================================================== */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+/* ==========================================================================
+   Formulários
+   ========================================================================== */
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--accent-strong);
+  outline: none;
+}
+
+/* ==========================================================================
+   Auth (login / registro / 404)
+   ========================================================================== */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+}
+.auth-box {
+  width: 100%;
+  max-width: 380px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+.auth-box h1 { font-size: 1.6rem; margin-bottom: 22px; }
+
+/* ==========================================================================
+   Home
+   ========================================================================== */
+.home {
+  max-width: 640px;
+  margin: 60px auto;
+  text-align: center;
+}
+.home h1 { font-size: 2.4rem; margin-bottom: 14px; }
+.home p { margin: 0 auto 28px; color: var(--text-muted); }
+
+/* ==========================================================================
+   Breadcrumb
+   ========================================================================== */
+.breadcrumb {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 22px;
+}
+.breadcrumb a { color: var(--text-muted); }
+.breadcrumb a:hover { color: var(--accent-strong); }
+
+/* ==========================================================================
+   Badges
+   ========================================================================== */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  background: var(--line);
+  color: var(--text-muted);
+}
+.badge-check {
+  display: inline-block;
+  color: var(--success);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   Mapa da jornada / cards de módulo
+   ========================================================================== */
+.course-section { margin-bottom: 40px; }
+.course-section > p { color: var(--text-muted); }
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.module-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.module-card.active { border-left-color: var(--accent); }
+.module-card.completed { border-left-color: var(--success); }
+.module-card.locked { border-left-color: var(--line); opacity: 0.65; }
+
+.module-card.active .badge { background: var(--accent-soft); color: var(--accent-strong); }
+.module-card.completed .badge { background: var(--success-soft); color: var(--success); }
+
+.module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.module-header h3 { margin: 0; }
+
+.module-progress { margin: 14px 0; }
+
+/* marcadores de status dentro do card (não o card em si) */
+.module-card .locked { font-size: 1.2rem; opacity: 0.85; }
+.module-card .completed { color: var(--success); font-weight: 600; font-size: 0.92rem; }
+
+/* ==========================================================================
+   Lista de aulas
+   ========================================================================== */
+.lesson-list { display: flex; flex-direction: column; gap: 10px; }
+
+.lesson-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+}
+.lesson-row.completed { border-color: rgba(47, 182, 115, 0.35); }
+.lesson-row .title { font-weight: 600; }
+.lesson-row .actions { flex-shrink: 0; }
+
+.lesson-content {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.lesson-content :last-child { margin-bottom: 0; }
+
+/* ==========================================================================
+   Exercícios / provas (quiz)
+   ========================================================================== */
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.quiz-option:hover { border-color: var(--accent-strong); }
+.quiz-option input[type="radio"] { accent-color: var(--accent); }
+
+.result-banner {
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--success-soft);
+  border: 1px solid rgba(47, 182, 115, 0.35);
+  color: #7CE0AE;
+  margin-bottom: 22px;
+  font-weight: 600;
+}
+.result-banner.is-wrong {
+  background: var(--danger-soft);
+  border-color: rgba(229, 72, 77, 0.35);
+  color: #FF9DA0;
+}
+
+/* ==========================================================================
+   Certificado
+   ========================================================================== */
+.certificate {
+  max-width: 760px;
+  margin: 40px auto;
+  padding: 60px 50px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at top, rgba(124, 92, 255, 0.08), transparent 60%),
+    var(--panel);
+}
+.certificate .code {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+/* ==========================================================================
+   Painel administrativo
+   ========================================================================== */
+.journey-grid .panel h3 {
+  font-size: 2rem;
+  margin-bottom: 4px;
+  color: var(--gold);
+}
+
+/* ==========================================================================
+   Responsivo
+   ========================================================================== */
+@media (max-width: 720px) {
+  .header .container { flex-direction: column; gap: 14px; align-items: flex-start; }
+  .journey-grid { grid-template-columns: 1fr !important; }
+  .certificate { padding: 40px 24px; }
+  .lesson-row { flex-direction: column; align-items: flex-start; }
+}

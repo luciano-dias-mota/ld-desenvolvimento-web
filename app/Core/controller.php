@@ -4,6 +4,13 @@ namespace App\Core;
 
 abstract class Controller
 {
+    protected $db;
+
+    public function __construct()
+    {
+        $this->db = Database::getInstance()->getConnection();
+    }
+
     protected function view(string $view, array $data = []): void
     {
         // Extrai dados para variáveis
@@ -16,26 +23,41 @@ abstract class Controller
             throw new \Exception("View {$view} não encontrada.");
         }
 
-        // Se for uma view que usa layout, carrega o layout
-        // Vamos usar uma convenção: se a view começar com 'layouts/' não usa layout
+        // Se a view já é um layout completo (ex: auth/login), carrega diretamente
         if (strpos($view, 'layouts/') === 0) {
             require $viewPath;
             return;
         }
 
-        // Verifica se a view é para layout principal
-        // Usaremos um layout padrão para views autenticadas, exceto auth e admin
-        $layout = 'main';
+        // Verifica se a view usa um layout padrão
+        $layout = null;
         if (strpos($view, 'auth/') === 0 || strpos($view, 'errors/') === 0) {
             $layout = 'auth';
         } elseif (strpos($view, 'admin/') === 0) {
-            // Pode usar layout admin ou main
+            $layout = 'main';
+        } elseif (strpos($view, 'certificado/') === 0) {
+            // Certificado tem layout próprio (imprime página sem header)
+            $layout = 'certificado';
+        } else {
             $layout = 'main';
         }
 
         // Carrega o layout e dentro dele a view
         $contentView = $viewPath;
-        require __DIR__ . '/../Views/layouts/' . $layout . '.php';
+        $layoutPath = __DIR__ . '/../Views/layouts/' . $layout . '.php';
+
+        if (file_exists($layoutPath)) {
+            require $layoutPath;
+        } else {
+            // Fallback: carrega a view sem layout
+            require $viewPath;
+        }
+    }
+
+    protected function layout(string $layoutName): void
+    {
+        // Método para ser chamado dentro de uma view, mas na prática é tratado no view()
+        // Mantido por compatibilidade, mas não é usado diretamente.
     }
 
     protected function redirect(string $url): void

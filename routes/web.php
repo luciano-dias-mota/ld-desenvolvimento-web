@@ -29,9 +29,8 @@ $router->get('/exercicios/{courseSlug}/{moduleSlug}/{lessonSlug}', 'ExerciseCont
 $router->post('/exercicios/{courseSlug}/{moduleSlug}/{lessonSlug}', 'ExerciseController@submit')->middleware('auth');
 
 // Certificado
+// IMPORTANTE: a rota de validação deve vir ANTES da rota dinâmica {courseSlug}
+$router->get('/certificado/validar/{code}', 'CertificateController@validar');
 $router->get('/certificado/{courseSlug}', 'CertificateController@show')->middleware('auth');
-
-// Validação de certificado (pública)
-$router->get('/certificado/validar/{code}', 'CertificateController@validate');
 
 // Página 404 (tratada pelo ErrorController)

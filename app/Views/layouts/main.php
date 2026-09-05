@@ -14,7 +14,7 @@
                 <a href="<?= url('/dashboard') ?>" class="logo"><span class="spark">&lt;/&gt;</span> PHP Quest</a>
                 <nav>
                     <a href="<?= url('/dashboard') ?>">Mapa</a>
-                    <?php if (Auth::isAdmin()): ?>
+                    <?php if (\App\Core\Auth::isAdmin()): ?>
                         <a href="<?= url('/admin/dashboard') ?>">Admin</a>
                     <?php endif; ?>
                     <form action="<?= url('/logout') ?>" method="POST" style="display:inline;">
@@ -25,10 +25,10 @@
             </div>
         </header>
         <main class="container">
-            <?php if ($flash = Session::flash('success')): ?>
+            <?php if ($flash = \App\Core\Session::flash('success')): ?>
                 <div class="alert alert-success"><?= e($flash) ?></div>
             <?php endif; ?>
-            <?php if ($flash = Session::flash('error')): ?>
+            <?php if ($flash = \App\Core\Session::flash('error')): ?>
                 <div class="alert alert-error"><?= e($flash) ?></div>
             <?php endif; ?>
             <?php require $contentView; ?>

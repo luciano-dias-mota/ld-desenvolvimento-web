@@ -1,7 +1,5 @@
 <?php
 
-use App\Core\Session;
-
 if (!function_exists('url')) {
     function url(string $path = ''): string
     {
@@ -27,9 +25,22 @@ if (!function_exists('e')) {
 if (!function_exists('csrf_field')) {
     function csrf_field(): string
     {
-        $token = bin2hex(random_bytes(32));
-        Session::set('csrf_token', $token);
-        return '<input type="hidden" name="csrf_token" value="' . $token . '">';
+        // Gera o token uma única vez por sessão. Antes, cada chamada criava
+        // um token novo e sobrescrevia o da sessão, invalidando qualquer
+        // outro formulário já renderizado na mesma página.
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        return '<input type="hidden" name="csrf_token" value="' . e($_SESSION['csrf_token']) . '">';
+    }
+}
+
+if (!function_exists('verify_csrf')) {
+    function verify_csrf(): bool
+    {
+        $token = $_POST['csrf_token'] ?? '';
+        return !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
     }
 }
 

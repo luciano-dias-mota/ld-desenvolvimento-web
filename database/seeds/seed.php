@@ -362,16 +362,12 @@ foreach ($modules as $modData) {
     echo "Módulo \"{$modData['title']}\" inserido com sucesso.\n";
 }
 
-// Agora definir desbloqueio de módulos (o módulo 1 fica ativo, os demais locked, e cada um desbloqueia o próximo)
-$db->exec("UPDATE modules SET status = 'active' WHERE id = " . $moduleIds['introducao-php-ambiente']);
-for ($i = 1; $i < count($moduleIds); $i++) {
-    // Não é necessário definir unlock_required_module_id se o desbloqueio for feito por lógica no sistema, mas podemos definir para referência.
-    // Vamos apenas deixar como está.
-}
+// Definir desbloqueio de módulos: o módulo 1 fica ativo, os demais permanecem
+// locked (já é o padrão de insertModule(), mas reforçamos aqui por clareza).
+$db->exec("UPDATE modules SET status = 'active' WHERE id = " . (int) $moduleIds['introducao-php-ambiente']);
 
-// Ajustar status dos módulos seguindo a ordem (todos locked, exceto primeiro)
 foreach ($moduleIds as $slug => $id) {
-    if ($slug != 'introducao-php-ambiente') {
+    if ($slug !== 'introducao-php-ambiente') {
         $db->prepare("UPDATE modules SET status = 'locked' WHERE id = ?")->execute([$id]);
     }
 }

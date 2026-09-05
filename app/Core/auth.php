@@ -8,7 +8,7 @@ class Auth
 {
     public static function attempt(string $email, string $password): bool
     {
-        $user = User::where('email', $email)->first();
+        $user = User::firstWhere('email', $email);
         if ($user && password_verify($password, $user['password'])) {
             Session::set('user_id', $user['id']);
             Session::set('user_role', $user['role']);

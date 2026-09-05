@@ -6,19 +6,19 @@ class Router
 {
     private array $routes = [];
     private array $middlewares = [];
-    private string $currentRoute = '';
+    private int $currentRoute = 0;
 
-    public function get(string $path, string $controllerAction): void
+    public function get(string $path, string $controllerAction): self
     {
-        $this->addRoute('GET', $path, $controllerAction);
+        return $this->addRoute('GET', $path, $controllerAction);
     }
 
-    public function post(string $path, string $controllerAction): void
+    public function post(string $path, string $controllerAction): self
     {
-        $this->addRoute('POST', $path, $controllerAction);
+        return $this->addRoute('POST', $path, $controllerAction);
     }
 
-    private function addRoute(string $method, string $path, string $controllerAction): void
+    private function addRoute(string $method, string $path, string $controllerAction): self
     {
         $this->routes[] = [
             'method' => $method,
@@ -28,6 +28,8 @@ class Router
         ];
         // Armazena o último índice para adicionar middlewares
         $this->currentRoute = array_key_last($this->routes);
+
+        return $this;
     }
 
     public function middleware(string $middleware): self

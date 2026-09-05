@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Auth;
 use App\Models\Course;
+use App\Models\Module;
 use App\Models\Certificate;
 
 class CertificateController extends Controller
@@ -17,32 +18,35 @@ class CertificateController extends Controller
         }
 
         // Buscar curso
-        $courseModel = new Course();
-        $course = $courseModel->where('slug', $courseSlug)->first();
+        $course = Course::firstWhere('slug', $courseSlug);
         if (!$course) {
             return $this->view('errors/404');
         }
 
         // Verificar se o usuário tem certificado
-        $certificate = Certificate::getUserCertificate($user->id, $course->id);
+        $certificate = Certificate::getUserCertificate($user['id'], $course['id']);
         if (!$certificate) {
             // Verificar se completou todos os módulos
-            $moduleModel = new \App\Models\Module();
-            $modules = $moduleModel->where('course_id', $course->id)->get();
+            $modules = Module::where('course_id', $course['id']);
             $allCompleted = true;
             foreach ($modules as $mod) {
-                if (!$mod->isCompletedByUser($user->id) && $mod->status != 'completed') {
+                // Verificar se o usuário passou na prova do módulo
+                $stmt = $this->db->prepare("SELECT COUNT(*) FROM user_module_tests WHERE user_id = ? AND module_test_id = (SELECT id FROM module_tests WHERE module_id = ?) AND passed = 1");
+                $stmt->execute([$user['id'], $mod['id']]);
+                $passedTest = $stmt->fetchColumn() > 0;
+                if (!$passedTest) {
                     $allCompleted = false;
                     break;
                 }
             }
+
             if ($allCompleted) {
                 // Gerar certificado
-                Certificate::createCertificate($user->id, $course->id);
-                $certificate = Certificate::getUserCertificate($user->id, $course->id);
+                Certificate::createCertificate($user['id'], $course['id']);
+                $certificate = Certificate::getUserCertificate($user['id'], $course['id']);
             } else {
                 // Não completou todos os módulos
-                $this->redirect('/dashboard?curso=' . $courseSlug);
+                return $this->redirect('/dashboard?curso=' . $courseSlug);
             }
         }
 
@@ -50,19 +54,15 @@ class CertificateController extends Controller
         $this->view('certificado/show', compact('course', 'user', 'certificate'));
     }
 
-    // Método para validar certificado via código (se tiver rota)
     public function validar($code)
     {
-        $db = $this->db;
-        $stmt = $db->prepare("SELECT * FROM certificates WHERE certificate_code = ?");
+        $stmt = $this->db->prepare("SELECT * FROM certificates WHERE certificate_code = ?");
         $stmt->execute([$code]);
         $certificate = $stmt->fetch(\PDO::FETCH_ASSOC);
         if ($certificate) {
             // Buscar dados do usuário e curso
-            $userModel = new \App\Models\User();
-            $user = $userModel->find($certificate['user_id']);
-            $courseModel = new Course();
-            $course = $courseModel->find($certificate['course_id']);
+            $user = \App\Models\User::find($certificate['user_id']);
+            $course = Course::find($certificate['course_id']);
             $this->view('certificado/validar', compact('certificate', 'user', 'course'));
         } else {
             $this->view('certificado/validar', ['certificate' => null]);

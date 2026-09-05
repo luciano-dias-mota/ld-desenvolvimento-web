@@ -3,46 +3,85 @@
 namespace App\Models;
 
 use App\Core\Model;
+use App\Core\Database;
 
 class Lesson extends Model
 {
-    protected $table = 'lessons';
-    protected $fillable = ['module_id', 'title', 'slug', 'description', 'content', 'lesson_number', 'xp_reward', 'estimated_minutes', 'status'];
+    protected static string $table = 'lessons';
 
-    // Relacionamento com módulo
-    public function module()
+    /**
+     * Retorna a próxima aula de um módulo, com base no número atual.
+     *
+     * @param int $moduleId
+     * @param int $currentLessonNumber
+     * @return array|null
+     */
+    public static function findNextLesson($moduleId, $currentLessonNumber)
     {
-        return $this->belongsTo(Module::class, 'module_id');
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare(
+            "SELECT * FROM lessons 
+             WHERE module_id = ? AND lesson_number > ? 
+             ORDER BY lesson_number ASC 
+             LIMIT 1"
+        );
+        $stmt->execute([$moduleId, $currentLessonNumber]);
+        return $stmt->fetch() ?: null;
     }
 
-    // Retorna o exercício associado (se houver)
-    public function exercise()
-    {
-        return $this->hasOne(Exercise::class, 'lesson_id');
-    }
-
-    // Verifica se o usuário concluiu esta aula
+    /**
+     * Verifica se o usuário concluiu esta aula.
+     *
+     * @param int $userId
+     * @return bool
+     */
     public function isCompletedByUser($userId)
     {
-        $db = $this->db;
-        $stmt = $db->prepare("SELECT COUNT(*) FROM user_lesson_progress WHERE user_id = ? AND lesson_id = ? AND completed = 1");
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare(
+            "SELECT COUNT(*) FROM user_lesson_progress 
+             WHERE user_id = ? AND lesson_id = ? AND completed = 1"
+        );
         $stmt->execute([$userId, $this->id]);
         return $stmt->fetchColumn() > 0;
     }
 
-    // Marca aula como concluída para o usuário
+    /**
+     * Marca a aula como concluída para o usuário, registrando o progresso e XP.
+     *
+     * @param int $userId
+     * @return void
+     */
     public function completeForUser($userId)
     {
-        $db = $this->db;
-        // Verifica se já existe
-        $stmt = $db->prepare("SELECT id FROM user_lesson_progress WHERE user_id = ? AND lesson_id = ?");
+        $db = Database::getInstance()->getConnection();
+
+        // Verifica se já existe registro
+        $stmt = $db->prepare(
+            "SELECT id FROM user_lesson_progress 
+             WHERE user_id = ? AND lesson_id = ?"
+        );
         $stmt->execute([$userId, $this->id]);
-        $exists = $stmt->fetchColumn();
-        if ($exists) {
-            $stmt = $db->prepare("UPDATE user_lesson_progress SET completed = 1, completed_at = NOW() WHERE user_id = ? AND lesson_id = ?");
+        $existing = $stmt->fetchColumn();
+
+        if ($existing) {
+            $stmt = $db->prepare(
+                "UPDATE user_lesson_progress 
+                 SET completed = 1, completed_at = NOW(), xp_earned = ? 
+                 WHERE id = ?"
+            );
+            $stmt->execute([$this->xp_reward, $existing]);
         } else {
-            $stmt = $db->prepare("INSERT INTO user_lesson_progress (user_id, lesson_id, completed, completed_at, xp_earned) VALUES (?, ?, 1, NOW(), 0)");
+            $stmt = $db->prepare(
+                "INSERT INTO user_lesson_progress 
+                 (user_id, lesson_id, completed, completed_at, xp_earned) 
+                 VALUES (?, ?, 1, NOW(), ?)"
+            );
+            $stmt->execute([$userId, $this->id, $this->xp_reward]);
         }
-        $stmt->execute([$userId, $this->id]);
+
+        // Atualiza XP do usuário
+        $stmt = $db->prepare("UPDATE users SET xp = xp + ? WHERE id = ?");
+        $stmt->execute([$this->xp_reward, $userId]);
     }
 }

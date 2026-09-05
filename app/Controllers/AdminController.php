@@ -12,7 +12,7 @@ class AdminController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        if (!$user || $user->role != 'admin') {
+        if (!$user || $user['role'] !== 'admin') {
             return $this->redirect('/');
         }
 

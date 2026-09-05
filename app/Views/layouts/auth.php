@@ -8,10 +8,10 @@
 </head>
 <body>
     <div class="auth-shell">
-        <?php if ($flash = Session::flash('success')): ?>
+        <?php if ($flash = \App\Core\Session::flash('success')): ?>
             <div class="alert alert-success"><?= e($flash) ?></div>
         <?php endif; ?>
-        <?php if ($flash = Session::flash('error')): ?>
+        <?php if ($flash = \App\Core\Session::flash('error')): ?>
             <div class="alert alert-error"><?= e($flash) ?></div>
         <?php endif; ?>
         <?php require $contentView; ?>
