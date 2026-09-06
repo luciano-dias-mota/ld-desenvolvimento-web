@@ -2,13 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Auth;
+use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Course;
 use App\Models\Module;
-use App\Models\Lesson;
-use App\Models\UserLessonProgress;
 
 class CourseController extends Controller
 {
@@ -16,56 +14,67 @@ class CourseController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            // Defesa extra além do middleware 'auth' já aplicado na rota
             $this->redirect('/login');
-            return;
         }
 
         $course = Course::firstWhere('slug', $courseSlug);
-        if (!$course) {
-            $this->redirect('/dashboard');
-            return;
+        if (!$course || ($course['status'] ?? '') !== 'published') {
+            $this->notFound();
         }
 
-        // Busca o módulo já filtrando pelo curso, evitando pegar um módulo
-        // de outro curso quando dois cursos têm módulos com o mesmo slug
         $module = Module::firstWhereAll([
             'course_id' => $course['id'],
-            'slug' => $moduleSlug
+            'slug' => $moduleSlug,
         ]);
         if (!$module) {
-            $this->redirect('/dashboard');
-            return;
+            $this->notFound();
         }
 
-        // Verifica se o módulo está desbloqueado para o usuário
-        // Se status for 'locked', redireciona
-        if ($module['status'] === 'locked') {
+        if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo está bloqueado. Complete o módulo anterior primeiro.');
-            $this->redirect('/dashboard');
-            return;
+            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
         }
 
-        // Busca as aulas do módulo
-        $lessons = Lesson::where('module_id', $module['id']);
+        $stmt = $this->db->prepare(
+            "SELECT *
+             FROM lessons
+             WHERE module_id = ? AND status = 'published'
+             ORDER BY lesson_number ASC, id ASC"
+        );
+        $stmt->execute([$module['id']]);
+        $lessons = $stmt->fetchAll();
 
-        // Para cada aula, verifica se o usuário concluiu
-        // (uma consulta indexada por user_id + lesson_id em vez de buscar
-        // todo o histórico do usuário e filtrar em PHP)
+        $progressMap = [];
+        if ($lessons !== []) {
+            $lessonIds = array_map(static fn(array $lesson): int => (int) $lesson['id'], $lessons);
+            $placeholders = implode(',', array_fill(0, count($lessonIds), '?'));
+
+            $stmt = $this->db->prepare(
+                "SELECT lesson_id, completed
+                 FROM user_lesson_progress
+                 WHERE user_id = ? AND lesson_id IN ({$placeholders})"
+            );
+            $stmt->execute(array_merge([(int) $user['id']], $lessonIds));
+
+            foreach ($stmt->fetchAll() as $progress) {
+                $progressMap[(int) $progress['lesson_id']] = (bool) $progress['completed'];
+            }
+        }
+
         foreach ($lessons as &$lesson) {
-            $progress = UserLessonProgress::firstWhereAll([
-                'user_id' => $user['id'],
-                'lesson_id' => $lesson['id']
-            ]);
-            $lesson['completed'] = $progress !== null && (bool) $progress['completed'];
+            $lesson['completed'] = $progressMap[(int) $lesson['id']] ?? false;
         }
-        unset($lesson); // evita que a referência do último item do foreach vaze para o restante do código
+        unset($lesson);
+
+        $module['status'] = $this->hasPassedModule((int) $user['id'], (int) $module['id'])
+            ? 'completed'
+            : 'active';
 
         $this->view('cursos/modulo', [
             'course' => $course,
             'module' => $module,
             'lessons' => $lessons,
-            'user' => $user
+            'user' => $user,
         ]);
     }
 }

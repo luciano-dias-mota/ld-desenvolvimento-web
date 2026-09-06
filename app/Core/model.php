@@ -8,8 +8,9 @@ abstract class Model
 {
     protected static string $table;
     protected static string $primaryKey = 'id';
+    protected static array $fillable = [];
 
-    protected $db;
+    protected PDO $db;
 
     public function __construct()
     {
@@ -23,109 +24,181 @@ abstract class Model
 
     public static function getTable(): string
     {
+        static::assertIdentifier(static::$table);
         return static::$table;
     }
 
     public static function all(): array
     {
-        $db = self::getDB();
-        $stmt = $db->query("SELECT * FROM " . static::$table);
+        $table = static::quoteIdentifier(static::$table);
+        $stmt = static::getDB()->query("SELECT * FROM {$table}");
         return $stmt->fetchAll();
     }
 
     public static function find(int $id): ?array
     {
-        $db = self::getDB();
-        $stmt = $db->prepare("SELECT * FROM " . static::$table . " WHERE " . static::$primaryKey . " = ?");
+        $table = static::quoteIdentifier(static::$table);
+        $primaryKey = static::quoteIdentifier(static::$primaryKey);
+        $stmt = static::getDB()->prepare("SELECT * FROM {$table} WHERE {$primaryKey} = ? LIMIT 1");
         $stmt->execute([$id]);
         return $stmt->fetch() ?: null;
     }
 
-    public static function where(string $column, $value): array
+    public static function where(string $column, mixed $value): array
     {
-        $db = self::getDB();
-        $stmt = $db->prepare("SELECT * FROM " . static::$table . " WHERE $column = ?");
+        $table = static::quoteIdentifier(static::$table);
+        $columnSql = static::quoteIdentifier($column);
+        $stmt = static::getDB()->prepare("SELECT * FROM {$table} WHERE {$columnSql} = ?");
         $stmt->execute([$value]);
         return $stmt->fetchAll();
     }
 
     public static function whereAll(array $conditions): array
     {
-        $db = self::getDB();
+        if ($conditions === []) {
+            throw new \InvalidArgumentException('whereAll() exige ao menos uma condição.');
+        }
+
+        $table = static::quoteIdentifier(static::$table);
         $whereClauses = [];
         $params = [];
+
         foreach ($conditions as $column => $value) {
-            $whereClauses[] = "$column = ?";
+            $whereClauses[] = static::quoteIdentifier((string) $column) . ' = ?';
             $params[] = $value;
         }
-        $whereSql = implode(' AND ', $whereClauses);
-        $stmt = $db->prepare("SELECT * FROM " . static::$table . " WHERE $whereSql");
+
+        $stmt = static::getDB()->prepare(
+            "SELECT * FROM {$table} WHERE " . implode(' AND ', $whereClauses)
+        );
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
 
-    public static function firstWhere(string $column, $value): ?array
+    public static function firstWhere(string $column, mixed $value): ?array
     {
-        $db = self::getDB();
-        $stmt = $db->prepare("SELECT * FROM " . static::$table . " WHERE $column = ? LIMIT 1");
+        $table = static::quoteIdentifier(static::$table);
+        $columnSql = static::quoteIdentifier($column);
+        $stmt = static::getDB()->prepare("SELECT * FROM {$table} WHERE {$columnSql} = ? LIMIT 1");
         $stmt->execute([$value]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public static function firstWhereAll(array $conditions): ?array
+    {
+        if ($conditions === []) {
+            throw new \InvalidArgumentException('firstWhereAll() exige ao menos uma condição.');
+        }
+
+        $table = static::quoteIdentifier(static::$table);
+        $whereClauses = [];
+        $params = [];
+
+        foreach ($conditions as $column => $value) {
+            $whereClauses[] = static::quoteIdentifier((string) $column) . ' = ?';
+            $params[] = $value;
+        }
+
+        $stmt = static::getDB()->prepare(
+            "SELECT * FROM {$table} WHERE " . implode(' AND ', $whereClauses) . ' LIMIT 1'
+        );
+        $stmt->execute($params);
         return $stmt->fetch() ?: null;
     }
 
     public static function create(array $data): int
     {
-        $db = self::getDB();
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
-        $stmt = $db->prepare("INSERT INTO " . static::$table . " ($columns) VALUES ($placeholders)");
+        $data = static::sanitizeWriteData($data);
+        if ($data === []) {
+            throw new \InvalidArgumentException('Nenhum dado válido informado para create().');
+        }
+
+        $table = static::quoteIdentifier(static::$table);
+        $columns = array_keys($data);
+        $quotedColumns = array_map([static::class, 'quoteIdentifier'], $columns);
+        $placeholders = ':' . implode(', :', $columns);
+
+        $stmt = static::getDB()->prepare(
+            "INSERT INTO {$table} (" . implode(', ', $quotedColumns) . ") VALUES ({$placeholders})"
+        );
         $stmt->execute($data);
-        return (int) $db->lastInsertId();
+
+        return (int) static::getDB()->lastInsertId();
     }
 
     public static function update(int $id, array $data): bool
     {
-        $db = self::getDB();
-        $set = [];
-        foreach ($data as $key => $value) {
-            $set[] = "$key = :$key";
+        $data = static::sanitizeWriteData($data);
+        if ($data === []) {
+            return false;
         }
-        $set = implode(', ', $set);
-        $data['id'] = $id;
-        $stmt = $db->prepare("UPDATE " . static::$table . " SET $set WHERE " . static::$primaryKey . " = :id");
+
+        $table = static::quoteIdentifier(static::$table);
+        $primaryKey = static::quoteIdentifier(static::$primaryKey);
+        $set = [];
+
+        foreach (array_keys($data) as $key) {
+            $set[] = static::quoteIdentifier($key) . " = :{$key}";
+        }
+
+        $data['__pk'] = $id;
+        $stmt = static::getDB()->prepare(
+            "UPDATE {$table} SET " . implode(', ', $set) . " WHERE {$primaryKey} = :__pk"
+        );
+
         return $stmt->execute($data);
     }
 
     public static function delete(int $id): bool
     {
-        $db = self::getDB();
-        $stmt = $db->prepare("DELETE FROM " . static::$table . " WHERE " . static::$primaryKey . " = ?");
+        $table = static::quoteIdentifier(static::$table);
+        $primaryKey = static::quoteIdentifier(static::$primaryKey);
+        $stmt = static::getDB()->prepare("DELETE FROM {$table} WHERE {$primaryKey} = ?");
         return $stmt->execute([$id]);
     }
 
-    // Retorna o primeiro registro de uma consulta com condições múltiplas
-    public static function firstWhereAll(array $conditions): ?array
-    {
-        $db = self::getDB();
-        $whereClauses = [];
-        $params = [];
-        foreach ($conditions as $column => $value) {
-            $whereClauses[] = "$column = ?";
-            $params[] = $value;
-        }
-        $whereSql = implode(' AND ', $whereClauses);
-        $stmt = $db->prepare("SELECT * FROM " . static::$table . " WHERE $whereSql LIMIT 1");
-        $stmt->execute($params);
-        return $stmt->fetch() ?: null;
-    }
-
-    // Método para obter o último ID inserido (para instância)
     public function save(): bool
     {
         $data = get_object_vars($this);
-        unset($data['db']); // remove propriedade $db
-        if (isset($data['id'])) {
-            return self::update($data['id'], $data);
+        unset($data['db']);
+
+        if (!isset($data['id'])) {
+            return false;
         }
-        return false;
+
+        $id = (int) $data['id'];
+        unset($data['id']);
+        return static::update($id, $data);
+    }
+
+    protected static function sanitizeWriteData(array $data): array
+    {
+        foreach (array_keys($data) as $column) {
+            static::assertIdentifier((string) $column);
+        }
+
+        if (static::$fillable !== []) {
+            $unknown = array_diff(array_keys($data), static::$fillable);
+            if ($unknown !== []) {
+                throw new \InvalidArgumentException(
+                    'Campos não permitidos: ' . implode(', ', $unknown)
+                );
+            }
+        }
+
+        return $data;
+    }
+
+    protected static function assertIdentifier(string $identifier): void
+    {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $identifier)) {
+            throw new \InvalidArgumentException("Identificador SQL inválido: {$identifier}");
+        }
+    }
+
+    protected static function quoteIdentifier(string $identifier): string
+    {
+        static::assertIdentifier($identifier);
+        return '`' . $identifier . '`';
     }
 }

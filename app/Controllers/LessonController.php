@@ -2,126 +2,157 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Auth;
+use App\Core\Controller;
+use App\Core\Session;
 use App\Models\Course;
-use App\Models\Module;
-use App\Models\Lesson;
 use App\Models\Exercise;
+use App\Models\Lesson;
+use App\Models\Module;
+use App\Models\UserLessonProgress;
 
 class LessonController extends Controller
 {
-    public function show($courseSlug, $moduleSlug, $lessonSlug)
+    public function show(string $courseSlug, string $moduleSlug, string $lessonSlug): void
     {
         $user = Auth::user();
         if (!$user) {
-            return $this->redirect('/login');
+            $this->redirect('/login');
         }
 
-        // Buscar curso
-        $course = Course::firstWhere('slug', $courseSlug);
-        if (!$course) {
-            return $this->view('errors/404');
+        [$course, $module, $lesson] = $this->resolveLesson($courseSlug, $moduleSlug, $lessonSlug);
+
+        if (!$this->canAccessModule((int) $user['id'], $module)) {
+            Session::flash('error', 'Este módulo ainda está bloqueado.');
+            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
         }
 
-        // Buscar módulo
-        $module = Module::firstWhereAll([
-            'course_id' => $course['id'],
-            'slug' => $moduleSlug
-        ]);
-        if (!$module) {
-            return $this->view('errors/404');
-        }
-
-        // Verificar se o módulo está desbloqueado para o usuário
-        if ($module['status'] === 'locked') {
-            return $this->redirect('/dashboard?curso=' . $courseSlug);
-        }
-
-        // Buscar aula
-        $lesson = Lesson::firstWhereAll([
-            'module_id' => $module['id'],
-            'slug' => $lessonSlug
-        ]);
-        if (!$lesson) {
-            return $this->view('errors/404');
-        }
-
-        // Verificar progresso
-        $progress = \App\Models\UserLessonProgress::firstWhereAll([
+        $progress = UserLessonProgress::firstWhereAll([
             'user_id' => $user['id'],
-            'lesson_id' => $lesson['id']
+            'lesson_id' => $lesson['id'],
         ]);
-        $completed = $progress && $progress['completed'];
+        $completed = $progress !== null && (bool) $progress['completed'];
 
-        // Buscar exercício associado (se houver)
         $exercise = Exercise::firstWhere('lesson_id', $lesson['id']);
+        if ($exercise && ($exercise['status'] ?? 'published') !== 'published') {
+            $exercise = null;
+        }
 
-        // Buscar próxima aula
-        $next = Lesson::findNextLesson($module['id'], $lesson['lesson_number']);
+        $stmt = $this->db->prepare(
+            "SELECT *
+             FROM lessons
+             WHERE module_id = ?
+               AND status = 'published'
+               AND lesson_number > ?
+             ORDER BY lesson_number ASC, id ASC
+             LIMIT 1"
+        );
+        $stmt->execute([$module['id'], $lesson['lesson_number']]);
+        $next = $stmt->fetch() ?: null;
 
         $this->view('aulas/show', compact('course', 'module', 'lesson', 'completed', 'exercise', 'next'));
     }
 
-    public function complete($courseSlug, $moduleSlug, $lessonSlug)
+    public function complete(string $courseSlug, string $moduleSlug, string $lessonSlug): void
     {
         $user = Auth::user();
         if (!$user) {
-            return $this->json(['error' => 'Não autorizado'], 401);
+            $this->redirect('/login');
         }
 
-        // Verificar CSRF
         if (!$this->validateCsrf()) {
-            return $this->json(['error' => 'Token inválido'], 403);
+            Session::flash('error', 'Sessão expirada. Recarregue a página e tente novamente.');
+            $this->redirect('/aulas/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
         }
 
-        // Buscar aula
+        [$course, $module, $lesson] = $this->resolveLesson($courseSlug, $moduleSlug, $lessonSlug);
+
+        if (!$this->canAccessModule((int) $user['id'], $module)) {
+            Session::flash('error', 'Este módulo ainda está bloqueado.');
+            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+        }
+
+        $this->db->beginTransaction();
+
+        try {
+            // Serializa alterações de XP do mesmo usuário e evita duplo clique concorrente.
+            $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+            $stmt->execute([$user['id']]);
+
+            $stmt = $this->db->prepare(
+                'SELECT id, completed
+                 FROM user_lesson_progress
+                 WHERE user_id = ? AND lesson_id = ?
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $stmt->execute([$user['id'], $lesson['id']]);
+            $progress = $stmt->fetch();
+
+            if ($progress && (bool) $progress['completed']) {
+                $this->db->commit();
+                Session::flash('success', 'Esta aula já estava concluída.');
+                $this->redirect('/aulas/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
+            }
+
+            $xpReward = max(0, (int) ($lesson['xp_reward'] ?? 0));
+
+            if ($progress) {
+                $stmt = $this->db->prepare(
+                    'UPDATE user_lesson_progress
+                     SET completed = 1, completed_at = NOW(), xp_earned = ?
+                     WHERE id = ?'
+                );
+                $stmt->execute([$xpReward, $progress['id']]);
+            } else {
+                $stmt = $this->db->prepare(
+                    'INSERT INTO user_lesson_progress
+                        (user_id, lesson_id, completed, completed_at, xp_earned)
+                     VALUES (?, ?, 1, NOW(), ?)'
+                );
+                $stmt->execute([$user['id'], $lesson['id'], $xpReward]);
+            }
+
+            if ($xpReward > 0) {
+                $stmt = $this->db->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
+                $stmt->execute([$xpReward, $user['id']]);
+            }
+
+            $this->db->commit();
+            Session::flash('success', 'Aula concluída! +' . $xpReward . ' XP.');
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
+
+        $this->redirect('/aulas/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
+    }
+
+    private function resolveLesson(string $courseSlug, string $moduleSlug, string $lessonSlug): array
+    {
         $course = Course::firstWhere('slug', $courseSlug);
-        if (!$course) {
-            return $this->json(['error' => 'Curso não encontrado'], 404);
+        if (!$course || ($course['status'] ?? '') !== 'published') {
+            $this->notFound();
         }
 
         $module = Module::firstWhereAll([
             'course_id' => $course['id'],
-            'slug' => $moduleSlug
+            'slug' => $moduleSlug,
         ]);
         if (!$module) {
-            return $this->json(['error' => 'Módulo não encontrado'], 404);
-        }
-
-        // A mesma checagem de show() estava faltando aqui: sem ela, um POST
-        // direto pra rota de conclusão marcava a aula como concluída (e dava XP)
-        // mesmo com o módulo bloqueado.
-        if ($module['status'] === 'locked') {
-            return $this->json(['error' => 'Módulo bloqueado'], 403);
+            $this->notFound();
         }
 
         $lesson = Lesson::firstWhereAll([
             'module_id' => $module['id'],
-            'slug' => $lessonSlug
+            'slug' => $lessonSlug,
         ]);
-        if (!$lesson) {
-            return $this->json(['error' => 'Aula não encontrada'], 404);
+        if (!$lesson || ($lesson['status'] ?? '') !== 'published') {
+            $this->notFound();
         }
 
-        // Marcar como concluída
-        $progress = \App\Models\UserLessonProgress::firstWhereAll([
-            'user_id' => $user['id'],
-            'lesson_id' => $lesson['id']
-        ]);
-
-        if ($progress) {
-            $this->db->prepare("UPDATE user_lesson_progress SET completed = 1, completed_at = NOW(), xp_earned = ? WHERE id = ?")
-                ->execute([$lesson['xp_reward'], $progress['id']]);
-        } else {
-            $this->db->prepare("INSERT INTO user_lesson_progress (user_id, lesson_id, completed, completed_at, xp_earned) VALUES (?, ?, 1, NOW(), ?)")
-                ->execute([$user['id'], $lesson['id'], $lesson['xp_reward']]);
-        }
-
-        // Atualizar XP do usuário
-        $this->db->prepare("UPDATE users SET xp = xp + ? WHERE id = ?")
-            ->execute([$lesson['xp_reward'], $user['id']]);
-
-        return $this->redirect('/aulas/' . $courseSlug . '/' . $moduleSlug . '/' . $lessonSlug);
+        return [$course, $module, $lesson];
     }
 }

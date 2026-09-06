@@ -2,148 +2,205 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Auth;
+use App\Core\Controller;
+use App\Core\Session;
 use App\Models\Course;
-use App\Models\Module;
-use App\Models\Lesson;
 use App\Models\Exercise;
+use App\Models\Lesson;
+use App\Models\Module;
 
 class ExerciseController extends Controller
 {
-    public function show($courseSlug, $moduleSlug, $lessonSlug)
+    public function show(string $courseSlug, string $moduleSlug, string $lessonSlug): void
     {
         $user = Auth::user();
         if (!$user) {
-            return $this->redirect('/login');
+            $this->redirect('/login');
         }
 
-        // Buscar curso, módulo, aula, exercício
-        $course = Course::firstWhere('slug', $courseSlug);
-        if (!$course) {
-            return $this->view('errors/404');
+        [$course, $module, $lesson, $exercise] = $this->resolveExercise($courseSlug, $moduleSlug, $lessonSlug);
+
+        if (!$this->canAccessModule((int) $user['id'], $module)) {
+            Session::flash('error', 'Este módulo ainda está bloqueado.');
+            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
         }
 
-        $module = Module::firstWhereAll([
-            'course_id' => $course['id'],
-            'slug' => $moduleSlug
-        ]);
-        if (!$module) {
-            return $this->view('errors/404');
-        }
-
-        // Módulo bloqueado não deve ser acessível diretamente pela URL
-        if ($module['status'] === 'locked') {
-            return $this->redirect('/dashboard?curso=' . $courseSlug);
-        }
-
-        $lesson = Lesson::firstWhereAll([
-            'module_id' => $module['id'],
-            'slug' => $lessonSlug
-        ]);
-        if (!$lesson) {
-            return $this->view('errors/404');
-        }
-
-        $exercise = Exercise::firstWhere('lesson_id', $lesson['id']);
-        if (!$exercise) {
-            return $this->redirect('/aulas/' . $courseSlug . '/' . $moduleSlug . '/' . $lessonSlug);
-        }
-
-        // Verificar submissão anterior
-        $stmt = $this->db->prepare("SELECT answer, is_correct FROM user_exercise_submissions WHERE user_id = ? AND exercise_id = ? ORDER BY id DESC LIMIT 1");
+        $stmt = $this->db->prepare(
+            'SELECT answer, is_correct, xp_earned
+             FROM user_exercise_submissions
+             WHERE user_id = ? AND exercise_id = ?
+             ORDER BY id DESC
+             LIMIT 1'
+        );
         $stmt->execute([$user['id'], $exercise['id']]);
-        $submission = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $submission = $stmt->fetch();
 
         $answer = $submission['answer'] ?? null;
-        $isCorrect = $submission['is_correct'] ?? null;
+        $isCorrect = array_key_exists('is_correct', $submission ?: [])
+            ? (bool) $submission['is_correct']
+            : null;
 
-        // Para múltipla escolha, decodificar options
-        $options = json_decode($exercise['options'], true);
+        // A view antiga exibe exercise.xp_reward no resultado. Ajustamos para mostrar
+        // o XP efetivamente recebido nesta tentativa, evitando informar recompensa duplicada.
+        if ($submission !== false && $submission !== null) {
+            $exercise['xp_reward'] = (int) ($submission['xp_earned'] ?? 0);
+        }
+
+        $options = json_decode((string) ($exercise['options'] ?? ''), true);
         if (!is_array($options)) {
             $options = [];
         }
 
-        $this->view('exercicios/show', compact('course', 'module', 'lesson', 'exercise', 'options', 'answer', 'isCorrect'));
+        $this->view(
+            'exercicios/show',
+            compact('course', 'module', 'lesson', 'exercise', 'options', 'answer', 'isCorrect')
+        );
     }
 
-    public function submit($courseSlug, $moduleSlug, $lessonSlug)
+    public function submit(string $courseSlug, string $moduleSlug, string $lessonSlug): void
     {
         $user = Auth::user();
         if (!$user) {
-            return $this->redirect('/login');
+            $this->redirect('/login');
         }
 
         if (!$this->validateCsrf()) {
-            return $this->json(['error' => 'Token inválido'], 403);
+            Session::flash('error', 'Sessão expirada. Recarregue a página e tente novamente.');
+            $this->redirect('/exercicios/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
         }
 
-        // Buscar dados
+        [$course, $module, $lesson, $exercise] = $this->resolveExercise($courseSlug, $moduleSlug, $lessonSlug);
+
+        if (!$this->canAccessModule((int) $user['id'], $module)) {
+            Session::flash('error', 'Este módulo ainda está bloqueado.');
+            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+        }
+
+        $answer = trim((string) ($_POST['resposta'] ?? ''));
+        if ($answer === '' || strlen($answer) > 10000) {
+            Session::flash('error', 'Envie uma resposta válida.');
+            $this->redirect('/exercicios/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
+        }
+
+        $correctAnswer = trim((string) ($exercise['correct_answer'] ?? ''));
+        $type = (string) ($exercise['exercise_type'] ?? '');
+
+        if (in_array($type, ['multiple_choice', 'true_false'], true)) {
+            $isCorrect = $answer === $correctAnswer;
+        } else {
+            // Para exercícios textuais/código, mantém comparação determinística exata,
+            // normalizando apenas espaços externos e finais de linha.
+            $normalizedAnswer = str_replace(["\r\n", "\r"], "\n", $answer);
+            $normalizedCorrect = str_replace(["\r\n", "\r"], "\n", $correctAnswer);
+            $isCorrect = $normalizedAnswer === $normalizedCorrect;
+        }
+
+        $this->db->beginTransaction();
+
+        try {
+            $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+            $stmt->execute([$user['id']]);
+
+            $stmt = $this->db->prepare(
+                'SELECT 1
+                 FROM user_exercise_submissions
+                 WHERE user_id = ? AND exercise_id = ? AND is_correct = 1
+                 LIMIT 1'
+            );
+            $stmt->execute([$user['id'], $exercise['id']]);
+            $alreadyRewarded = (bool) $stmt->fetchColumn();
+
+            $xpReward = max(0, (int) ($exercise['xp_reward'] ?? 0));
+            $xpEarned = ($isCorrect && !$alreadyRewarded) ? $xpReward : 0;
+
+            $stmt = $this->db->prepare(
+                'INSERT INTO user_exercise_submissions
+                    (user_id, exercise_id, answer, is_correct, xp_earned, submitted_at)
+                 VALUES (?, ?, ?, ?, ?, NOW())'
+            );
+            $stmt->execute([
+                $user['id'],
+                $exercise['id'],
+                $answer,
+                (int) $isCorrect,
+                $xpEarned,
+            ]);
+
+            if ($isCorrect) {
+                if ($xpEarned > 0) {
+                    $stmt = $this->db->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
+                    $stmt->execute([$xpEarned, $user['id']]);
+                }
+
+                $stmt = $this->db->prepare(
+                    'SELECT id, completed
+                     FROM user_lesson_progress
+                     WHERE user_id = ? AND lesson_id = ?
+                     LIMIT 1
+                     FOR UPDATE'
+                );
+                $stmt->execute([$user['id'], $lesson['id']]);
+                $progress = $stmt->fetch();
+
+                if ($progress) {
+                    if (!(bool) $progress['completed']) {
+                        $stmt = $this->db->prepare(
+                            'UPDATE user_lesson_progress
+                             SET completed = 1, completed_at = NOW()
+                             WHERE id = ?'
+                        );
+                        $stmt->execute([$progress['id']]);
+                    }
+                } else {
+                    $stmt = $this->db->prepare(
+                        'INSERT INTO user_lesson_progress
+                            (user_id, lesson_id, completed, completed_at, xp_earned)
+                         VALUES (?, ?, 1, NOW(), ?)'
+                    );
+                    $stmt->execute([$user['id'], $lesson['id'], $xpEarned]);
+                }
+            }
+
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
+
+        $this->redirect('/exercicios/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
+    }
+
+    private function resolveExercise(string $courseSlug, string $moduleSlug, string $lessonSlug): array
+    {
         $course = Course::firstWhere('slug', $courseSlug);
-        if (!$course) {
-            return $this->view('errors/404');
+        if (!$course || ($course['status'] ?? '') !== 'published') {
+            $this->notFound();
         }
 
         $module = Module::firstWhereAll([
             'course_id' => $course['id'],
-            'slug' => $moduleSlug
+            'slug' => $moduleSlug,
         ]);
         if (!$module) {
-            return $this->view('errors/404');
-        }
-
-        // Módulo bloqueado não deve aceitar submissões via POST direto
-        if ($module['status'] === 'locked') {
-            return $this->redirect('/dashboard?curso=' . $courseSlug);
+            $this->notFound();
         }
 
         $lesson = Lesson::firstWhereAll([
             'module_id' => $module['id'],
-            'slug' => $lessonSlug
+            'slug' => $lessonSlug,
         ]);
-        if (!$lesson) {
-            return $this->view('errors/404');
+        if (!$lesson || ($lesson['status'] ?? '') !== 'published') {
+            $this->notFound();
         }
 
         $exercise = Exercise::firstWhere('lesson_id', $lesson['id']);
-        if (!$exercise) {
-            return $this->redirect('/aulas/' . $courseSlug . '/' . $moduleSlug . '/' . $lessonSlug);
+        if (!$exercise || ($exercise['status'] ?? '') !== 'published') {
+            $this->redirect('/aulas/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
         }
 
-        // Processar resposta
-        $answer = $_POST['resposta'] ?? '';
-
-        // Removido o if/else redundante que tinha a mesma lógica nos dois ramos
-        // (multiple_choice/true_false vs. demais tipos). Se no futuro cada tipo
-        // de exercício precisar de uma comparação diferente, é aqui que entra.
-        $correct = $exercise['correct_answer'];
-        $isCorrect = (trim($answer) == trim($correct));
-
-        // Registrar submissão
-        $xpEarned = $isCorrect ? $exercise['xp_reward'] : 0;
-        $stmt = $this->db->prepare("INSERT INTO user_exercise_submissions (user_id, exercise_id, answer, is_correct, xp_earned, submitted_at) VALUES (?, ?, ?, ?, ?, NOW())");
-        $stmt->execute([$user['id'], $exercise['id'], $answer, (int) $isCorrect, $xpEarned]);
-
-        // Atualizar XP do usuário se correto
-        if ($isCorrect) {
-            $this->db->prepare("UPDATE users SET xp = xp + ? WHERE id = ?")
-                ->execute([$xpEarned, $user['id']]);
-
-            // Marcar aula como concluída automaticamente
-            $progress = \App\Models\UserLessonProgress::firstWhereAll([
-                'user_id' => $user['id'],
-                'lesson_id' => $lesson['id']
-            ]);
-            if ($progress) {
-                $this->db->prepare("UPDATE user_lesson_progress SET completed = 1, completed_at = NOW() WHERE id = ?")
-                    ->execute([$progress['id']]);
-            } else {
-                $this->db->prepare("INSERT INTO user_lesson_progress (user_id, lesson_id, completed, completed_at, xp_earned) VALUES (?, ?, 1, NOW(), ?)")
-                    ->execute([$user['id'], $lesson['id'], $xpEarned]);
-            }
-        }
-
-        // Redirecionar com mensagem
-        return $this->redirect('/exercicios/' . $courseSlug . '/' . $moduleSlug . '/' . $lessonSlug . '?result=' . ($isCorrect ? 'correct' : 'wrong'));
+        return [$course, $module, $lesson, $exercise];
     }
 }

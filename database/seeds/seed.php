@@ -4,15 +4,34 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Database;
 
-$db = Database::getInstance()->getConnection();
-
-// Limpeza (cuidado: apaga todos os dados)
-$db->exec("SET FOREIGN_KEY_CHECKS = 0");
-$tables = ['certificates', 'user_module_tests', 'user_exercise_submissions', 'user_lesson_progress', 'test_questions', 'module_tests', 'exercises', 'lessons', 'modules', 'courses'];
-foreach ($tables as $table) {
-    $db->exec("TRUNCATE TABLE $table");
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Seed disponível somente via linha de comando.');
 }
-$db->exec("SET FOREIGN_KEY_CHECKS = 1");
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->safeLoad();
+
+$appEnv = strtolower((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'));
+if (in_array($appEnv, ['production', 'prod'], true)) {
+    exit("Seed destrutivo bloqueado em produção.\n");
+}
+
+if (!in_array('--force', $argv ?? [], true)) {
+    exit("Este seed apaga os dados acadêmicos existentes. Execute com --force somente em ambiente de desenvolvimento.\n");
+}
+
+$db = Database::getInstance()->getConnection();
+$tables = ['certificates', 'user_module_tests', 'user_exercise_submissions', 'user_lesson_progress', 'test_questions', 'module_tests', 'exercises', 'lessons', 'modules', 'courses'];
+
+$db->exec('SET FOREIGN_KEY_CHECKS = 0');
+$db->beginTransaction();
+
+try {
+    foreach ($tables as $table) {
+        // Nomes vêm de uma lista fixa acima; não há entrada do usuário.
+        $db->exec("DELETE FROM `{$table}`");
+    }
 
 // 1. Inserir curso
 $courseId = insertCourse($db, 'LD Desenvolvimento Web', 'ld-desenvolvimento-web', 'Curso completo de desenvolvimento web com PHP, do zero ao framework Laravel.', 'published');
@@ -68,7 +87,7 @@ $modules = [
             'passing_score' => 70,
             'questions' => [
                 ['q' => 'Qual o tipo de dado para números decimais?', 'opts' => ['a' => 'int', 'b' => 'float', 'c' => 'string', 'd' => 'bool'], 'correct' => 'b', 'points' => 1],
-                ['q' => 'Como se define uma constante?', 'opts' => ['a' => 'const', 'b' => 'define()', 'c' => 'static', 'd' => 'let'], 'correct' => 'b', 'points' => 1],
+                ['q' => 'Qual função pode criar uma constante em tempo de execução?', 'opts' => ['a' => 'define()', 'b' => 'constant()', 'c' => 'isset()', 'd' => 'static()'], 'correct' => 'a', 'points' => 1],
                 ['q' => 'Qual operador lógico representa "E"?', 'opts' => ['a' => '&&', 'b' => '||', 'c' => '!', 'd' => 'xor'], 'correct' => 'a', 'points' => 1],
                 ['q' => 'Qual a saída de var_dump(true)?', 'opts' => ['a' => 'true', 'b' => '1', 'c' => 'bool(true)', 'd' => 'TRUE'], 'correct' => 'c', 'points' => 1],
                 ['q' => 'Qual o operador de concatenação?', 'opts' => ['a' => '.', 'b' => '+', 'c' => '&', 'd' => '||'], 'correct' => 'a', 'points' => 1]
@@ -255,8 +274,8 @@ $modules = [
             'title' => 'Quiz - Blade',
             'type' => 'multiple_choice',
             'question' => 'Qual diretiva do Blade exibe uma variável?',
-            'options' => json_encode(['a' => '{{ $var }}', 'b' => '<?= $var ?>', 'c' => '{{ $var }}', 'd' => 'Ambas a e c']),
-            'correct' => 'd',
+            'options' => json_encode(['a' => '{{ $var }}', 'b' => '{!! $var !!}', 'c' => '@yield(\"var\")', 'd' => '@include(\"var\")']),
+            'correct' => 'a',
             'xp' => 20
         ],
         'test' => [
@@ -337,7 +356,9 @@ foreach ($modules as $modData) {
 
     // Inserir aulas
     for ($i = 1; $i <= $modData['lessons']; $i++) {
-        $lessonSlug = 'aula-' . $i;
+        $lessonSlug = ($i === min(5, (int) $modData['lessons']))
+            ? $modData['exercise']['lesson_slug']
+            : 'aula-' . $i;
         $lessonTitle = 'Aula ' . $i . ' - ' . $modData['title'];
         // Conteúdo genérico (pode ser melhorado)
         $content = "<p>Nesta aula você aprenderá sobre <strong>{$modData['title']}</strong>. Este é um conteúdo de exemplo para a aula número $i do módulo \"{$modData['title']}\".</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel nisl non sapien tincidunt tincidunt.</p>";
@@ -355,8 +376,17 @@ foreach ($modules as $modData) {
 
     // Inserir prova
     $testId = insertModuleTest($db, $moduleId, $modData['test']['title'], $modData['test']['passing_score'], 100);
-    foreach ($modData['test']['questions'] as $q) {
-        insertTestQuestion($db, $testId, $q['q'], 'multiple_choice', json_encode($q['opts']), $q['correct'], $q['points']);
+    foreach ($modData['test']['questions'] as $index => $q) {
+        insertTestQuestion(
+            $db,
+            $testId,
+            $q['q'],
+            'multiple_choice',
+            json_encode($q['opts']),
+            $q['correct'],
+            $q['points'],
+            $index + 1
+        );
     }
 
     echo "Módulo \"{$modData['title']}\" inserido com sucesso.\n";
@@ -372,7 +402,19 @@ foreach ($moduleIds as $slug => $id) {
     }
 }
 
-echo "Seed concluído com sucesso!";
+    $db->commit();
+    echo "Seed concluído com sucesso!\n";
+} catch (Throwable $e) {
+    if ($db->inTransaction()) {
+        $db->rollBack();
+    }
+
+    error_log('Falha no seed: ' . $e->getMessage());
+    fwrite(STDERR, "Falha ao executar o seed. Consulte o log da aplicação.\n");
+    exit(1);
+} finally {
+    $db->exec('SET FOREIGN_KEY_CHECKS = 1');
+}
 
 // ======================== FUNÇÕES AUXILIARES ========================
 
@@ -406,7 +448,7 @@ function insertModuleTest($db, $moduleId, $title, $passingScore, $xp) {
     return $db->lastInsertId();
 }
 
-function insertTestQuestion($db, $testId, $question, $type, $options, $correct, $points) {
-    $stmt = $db->prepare("INSERT INTO test_questions (module_test_id, question, question_type, options, correct_answer, points, question_number) VALUES (?, ?, ?, ?, ?, ?, (SELECT COUNT(*)+1 FROM test_questions WHERE module_test_id = ?))");
-    $stmt->execute([$testId, $question, $type, $options, $correct, $points, $testId]);
+function insertTestQuestion($db, $testId, $question, $type, $options, $correct, $points, $questionNumber) {
+    $stmt = $db->prepare("INSERT INTO test_questions (module_test_id, question, question_type, options, correct_answer, points, question_number) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$testId, $question, $type, $options, $correct, $points, $questionNumber]);
 }

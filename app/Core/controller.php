@@ -4,7 +4,7 @@ namespace App\Core;
 
 abstract class Controller
 {
-    protected $db;
+    protected \PDO $db;
 
     public function __construct()
     {
@@ -13,79 +13,185 @@ abstract class Controller
 
     protected function view(string $view, array $data = []): void
     {
-        // Extrai dados para variáveis
-        extract($data);
+        extract($data, EXTR_SKIP);
 
-        // Define caminho base das views
         $viewPath = __DIR__ . '/../Views/' . str_replace('.', '/', $view) . '.php';
-
-        if (!file_exists($viewPath)) {
-            throw new \Exception("View {$view} não encontrada.");
+        if (!is_file($viewPath)) {
+            throw new \RuntimeException("View {$view} não encontrada.");
         }
 
-        // Se a view já é um layout completo (ex: auth/login), carrega diretamente
-        if (strpos($view, 'layouts/') === 0) {
+        if (str_starts_with($view, 'layouts/') || str_starts_with($view, 'errors/')) {
+            // As views de erro atuais já são documentos HTML completos.
             require $viewPath;
             return;
         }
 
-        // Verifica se a view usa um layout padrão
-        $layout = null;
-        if (strpos($view, 'auth/') === 0 || strpos($view, 'errors/') === 0) {
+        if ($view === 'certificado/show') {
+            // A view atual do certificado já é um documento HTML completo.
+            require $viewPath;
+            return;
+        }
+
+        if (str_starts_with($view, 'auth/') || $view === 'certificado/validar') {
             $layout = 'auth';
-        } elseif (strpos($view, 'admin/') === 0) {
+        } elseif (str_starts_with($view, 'admin/')) {
             $layout = 'main';
-        } elseif (strpos($view, 'certificado/') === 0) {
-            // Certificado tem layout próprio (imprime página sem header)
-            $layout = 'certificado';
         } else {
             $layout = 'main';
         }
 
-        // Carrega o layout e dentro dele a view
         $contentView = $viewPath;
         $layoutPath = __DIR__ . '/../Views/layouts/' . $layout . '.php';
 
-        if (file_exists($layoutPath)) {
+        if (is_file($layoutPath)) {
             require $layoutPath;
-        } else {
-            // Fallback: carrega a view sem layout
-            require $viewPath;
+            return;
         }
+
+        require $viewPath;
     }
 
     protected function layout(string $layoutName): void
     {
-        // Método para ser chamado dentro de uma view, mas na prática é tratado no view()
-        // Mantido por compatibilidade, mas não é usado diretamente.
+        // Mantido apenas por compatibilidade com views antigas.
+        // A seleção real do layout é feita em view().
     }
 
-    protected function redirect(string $url): void
+    protected function redirect(string $url, int $status = 302): void
     {
-        header('Location: ' . $url);
+        if (headers_sent()) {
+            throw new \RuntimeException('Não foi possível redirecionar: os cabeçalhos HTTP já foram enviados.');
+        }
+
+        $location = $url;
+        if (str_starts_with($url, '/')) {
+            if (function_exists('url')) {
+                $location = url($url);
+            } else {
+                $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+                $basePath = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
+                $location = (($basePath !== '' && $basePath !== '.' && $basePath !== '/') ? $basePath : '') . $url;
+            }
+        }
+
+        header('Location: ' . $location, true, $status);
         exit;
     }
 
-    protected function json(array $data): void
+    protected function json(array $data, int $status = 200): void
     {
-        header('Content-Type: application/json');
-        echo json_encode($data);
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
 
     protected function csrfField(): string
     {
-        $token = bin2hex(random_bytes(32));
-        Session::set('csrf_token', $token);
-        return '<input type="hidden" name="csrf_token" value="' . $token . '">';
+        $token = Session::get('csrf_token');
+
+        if (!is_string($token) || $token === '') {
+            $token = bin2hex(random_bytes(32));
+            Session::set('csrf_token', $token);
+        }
+
+        return '<input type="hidden" name="csrf_token" value="'
+            . htmlspecialchars($token, ENT_QUOTES, 'UTF-8')
+            . '">';
     }
 
-    protected function validateCsrf(): void
+    protected function validateCsrf(): bool
     {
         $token = $_POST['csrf_token'] ?? '';
-        if ($token !== Session::get('csrf_token')) {
-            http_response_code(403);
-            die('CSRF token inválido.');
+        $sessionToken = Session::get('csrf_token');
+
+        if (!is_string($token) || !is_string($sessionToken) || $token === '' || $sessionToken === '') {
+            return false;
         }
+
+        return hash_equals($sessionToken, $token);
+    }
+
+    protected function notFound(): void
+    {
+        http_response_code(404);
+        $this->view('errors/404');
+        exit;
+    }
+
+    /**
+     * Define acesso ao módulo por usuário, sem alterar modules.status.
+     * O primeiro módulo é liberado; os demais dependem da aprovação
+     * do módulo imediatamente anterior.
+     */
+    protected function canAccessModule(int $userId, array $module): bool
+    {
+        $moduleNumber = (int) ($module['module_number'] ?? 0);
+        $courseId = (int) ($module['course_id'] ?? 0);
+
+        if ($courseId <= 0 || $moduleNumber <= 0) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT id
+             FROM modules
+             WHERE course_id = ? AND module_number < ?
+             ORDER BY module_number DESC, id DESC
+             LIMIT 1'
+        );
+        $stmt->execute([$courseId, $moduleNumber]);
+        $previousModuleId = $stmt->fetchColumn();
+
+        if (!$previousModuleId) {
+            return true;
+        }
+
+        return $this->hasPassedModule($userId, (int) $previousModuleId);
+    }
+
+    protected function hasPassedModule(int $userId, int $moduleId): bool
+    {
+        $stmt = $this->db->prepare(
+            'SELECT 1
+             FROM module_tests mt
+             INNER JOIN user_module_tests umt ON umt.module_test_id = mt.id
+             WHERE mt.module_id = ?
+               AND umt.user_id = ?
+               AND umt.passed = 1
+             LIMIT 1'
+        );
+        $stmt->execute([$moduleId, $userId]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
+    protected function hasCompletedAllLessons(int $userId, int $moduleId): bool
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*)
+             FROM lessons
+             WHERE module_id = ? AND status = 'published'"
+        );
+        $stmt->execute([$moduleId]);
+        $totalLessons = (int) $stmt->fetchColumn();
+
+        if ($totalLessons === 0) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(DISTINCT l.id)
+             FROM lessons l
+             INNER JOIN user_lesson_progress ulp ON ulp.lesson_id = l.id
+             WHERE l.module_id = ?
+               AND l.status = 'published'
+               AND ulp.user_id = ?
+               AND ulp.completed = 1"
+        );
+        $stmt->execute([$moduleId, $userId]);
+        $completedLessons = (int) $stmt->fetchColumn();
+
+        return $completedLessons >= $totalLessons;
     }
 }

@@ -2,70 +2,115 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Auth;
-use App\Models\Course;
-use App\Models\Module;
+use App\Core\Controller;
+use App\Core\Session;
 use App\Models\Certificate;
+use App\Models\Course;
+use App\Models\User;
 
 class CertificateController extends Controller
 {
-    public function show($courseSlug)
+    public function show(string $courseSlug): void
     {
         $user = Auth::user();
         if (!$user) {
-            return $this->redirect('/login');
+            $this->redirect('/login');
         }
 
-        // Buscar curso
         $course = Course::firstWhere('slug', $courseSlug);
-        if (!$course) {
-            return $this->view('errors/404');
+        if (!$course || ($course['status'] ?? '') !== 'published') {
+            $this->notFound();
         }
 
-        // Verificar se o usuário tem certificado
-        $certificate = Certificate::getUserCertificate($user['id'], $course['id']);
+        if (!$this->isEligibleForCertificate((int) $user['id'], (int) $course['id'])) {
+            Session::flash('error', 'Conclua todas as aulas e provas do curso antes de emitir o certificado.');
+            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+        }
+
+        $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
+
         if (!$certificate) {
-            // Verificar se completou todos os módulos
-            $modules = Module::where('course_id', $course['id']);
-            $allCompleted = true;
-            foreach ($modules as $mod) {
-                // Verificar se o usuário passou na prova do módulo
-                $stmt = $this->db->prepare("SELECT COUNT(*) FROM user_module_tests WHERE user_id = ? AND module_test_id = (SELECT id FROM module_tests WHERE module_id = ?) AND passed = 1");
-                $stmt->execute([$user['id'], $mod['id']]);
-                $passedTest = $stmt->fetchColumn() > 0;
-                if (!$passedTest) {
-                    $allCompleted = false;
-                    break;
-                }
-            }
+            $this->db->beginTransaction();
 
-            if ($allCompleted) {
-                // Gerar certificado
-                Certificate::createCertificate($user['id'], $course['id']);
-                $certificate = Certificate::getUserCertificate($user['id'], $course['id']);
-            } else {
-                // Não completou todos os módulos
-                return $this->redirect('/dashboard?curso=' . $courseSlug);
+            try {
+                $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+                $stmt->execute([$user['id']]);
+
+                $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
+                if (!$certificate) {
+                    Certificate::createCertificate((int) $user['id'], (int) $course['id']);
+                    $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
+                }
+
+                $this->db->commit();
+            } catch (\Throwable $e) {
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
+                throw $e;
             }
         }
 
-        // Exibir certificado
+        if (!$certificate) {
+            throw new \RuntimeException('Não foi possível gerar o certificado.');
+        }
+
         $this->view('certificado/show', compact('course', 'user', 'certificate'));
     }
 
-    public function validar($code)
+    public function validar(string $code): void
     {
-        $stmt = $this->db->prepare("SELECT * FROM certificates WHERE certificate_code = ?");
-        $stmt->execute([$code]);
-        $certificate = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if ($certificate) {
-            // Buscar dados do usuário e curso
-            $user = \App\Models\User::find($certificate['user_id']);
-            $course = Course::find($certificate['course_id']);
-            $this->view('certificado/validar', compact('certificate', 'user', 'course'));
-        } else {
+        $code = trim($code);
+        if ($code === '' || strlen($code) > 128) {
             $this->view('certificado/validar', ['certificate' => null]);
+            return;
         }
+
+        $stmt = $this->db->prepare(
+            'SELECT * FROM certificates WHERE certificate_code = ? LIMIT 1'
+        );
+        $stmt->execute([$code]);
+        $certificate = $stmt->fetch();
+
+        if (!$certificate) {
+            $this->view('certificado/validar', ['certificate' => null]);
+            return;
+        }
+
+        $user = User::find((int) $certificate['user_id']);
+        $course = Course::find((int) $certificate['course_id']);
+
+        if (!$user || !$course || !$this->isEligibleForCertificate((int) $user['id'], (int) $course['id'])) {
+            $this->view('certificado/validar', ['certificate' => null]);
+            return;
+        }
+
+        // Compatibilidade com a view antiga, que usava $certificate['code'].
+        $certificate['code'] = $certificate['certificate_code'];
+
+        $this->view('certificado/validar', compact('certificate', 'user', 'course'));
+    }
+
+    private function isEligibleForCertificate(int $userId, int $courseId): bool
+    {
+        $stmt = $this->db->prepare(
+            'SELECT id FROM modules WHERE course_id = ? ORDER BY module_number ASC, id ASC'
+        );
+        $stmt->execute([$courseId]);
+        $moduleIds = array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+
+        if ($moduleIds === []) {
+            return false;
+        }
+
+        foreach ($moduleIds as $moduleId) {
+            if (!$this->hasCompletedAllLessons($userId, $moduleId)
+                || !$this->hasPassedModule($userId, $moduleId)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

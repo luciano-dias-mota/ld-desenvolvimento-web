@@ -2,31 +2,35 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Auth;
-use App\Models\Course;
-use App\Models\User;
+use App\Core\Controller;
+use App\Core\Session;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function dashboard(): void
     {
-        $user = Auth::user();
-        if (!$user || $user['role'] !== 'admin') {
-            return $this->redirect('/');
+        if (!Auth::isAdmin()) {
+            Session::flash('error', 'Acesso restrito a administradores.');
+            $this->redirect('/dashboard');
         }
 
-        // Estatísticas
-        $db = $this->db;
-        $stats = [];
-        $stats['usuarios'] = $db->query("SELECT COUNT(*) FROM users")->fetchColumn();
-        $stats['cursos'] = $db->query("SELECT COUNT(*) FROM courses")->fetchColumn();
-        $stats['modulos'] = $db->query("SELECT COUNT(*) FROM modules")->fetchColumn();
-        $stats['aulas'] = $db->query("SELECT COUNT(*) FROM lessons")->fetchColumn();
+        $stats = $this->db->query(
+            'SELECT
+                (SELECT COUNT(*) FROM users) AS usuarios,
+                (SELECT COUNT(*) FROM courses) AS cursos,
+                (SELECT COUNT(*) FROM modules) AS modulos,
+                (SELECT COUNT(*) FROM lessons) AS aulas'
+        )->fetch() ?: [
+            'usuarios' => 0,
+            'cursos' => 0,
+            'modulos' => 0,
+            'aulas' => 0,
+        ];
 
-        // Listar cursos
-        $courseModel = new Course();
-        $courses = $courseModel->all();
+        $courses = $this->db
+            ->query('SELECT * FROM courses ORDER BY id DESC')
+            ->fetchAll();
 
         $this->view('admin/dashboard', compact('stats', 'courses'));
     }

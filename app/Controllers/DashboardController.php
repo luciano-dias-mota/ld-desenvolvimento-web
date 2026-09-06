@@ -2,12 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Auth;
-use App\Models\Course;
-use App\Models\Module;
-use App\Models\Lesson;
-use App\Models\UserLessonProgress;
+use App\Core\Controller;
 
 class DashboardController extends Controller
 {
@@ -15,50 +11,94 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            header('Location: /login');
-            exit;
+            $this->redirect('/login');
         }
 
-        // Pega todos os cursos
-        $courses = Course::all();
+        $courses = $this->db
+            ->query("SELECT * FROM courses WHERE status = 'published' ORDER BY id ASC")
+            ->fetchAll();
 
-        // Para cada curso, pega os módulos e calcula progresso
+        if ($courses === []) {
+            $this->view('dashboard/index', [
+                'courses' => [],
+                'user' => $user,
+            ]);
+            return;
+        }
+
+        $courseIds = array_map(static fn(array $course): int => (int) $course['id'], $courses);
+        $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
+
+        $sql = "SELECT
+                    m.*,
+                    (
+                        SELECT COUNT(*)
+                        FROM lessons l
+                        WHERE l.module_id = m.id AND l.status = 'published'
+                    ) AS lessons_count,
+                    (
+                        SELECT COUNT(DISTINCT l2.id)
+                        FROM lessons l2
+                        INNER JOIN user_lesson_progress ulp ON ulp.lesson_id = l2.id
+                        WHERE l2.module_id = m.id
+                          AND l2.status = 'published'
+                          AND ulp.user_id = ?
+                          AND ulp.completed = 1
+                    ) AS lessons_completed,
+                    EXISTS(
+                        SELECT 1
+                        FROM module_tests mt
+                        INNER JOIN user_module_tests umt ON umt.module_test_id = mt.id
+                        WHERE mt.module_id = m.id
+                          AND umt.user_id = ?
+                          AND umt.passed = 1
+                    ) AS passed
+                FROM modules m
+                WHERE m.course_id IN ({$placeholders})
+                ORDER BY m.course_id ASC, m.module_number ASC, m.id ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array_merge([(int) $user['id'], (int) $user['id']], $courseIds));
+        $moduleRows = $stmt->fetchAll();
+
+        $modulesByCourse = [];
+        foreach ($moduleRows as $module) {
+            $modulesByCourse[(int) $module['course_id']][] = $module;
+        }
+
         $courseData = [];
         foreach ($courses as $course) {
-            $modules = Module::where('course_id', $course['id']);
-            $totalLessons = 0;
-            $completedLessons = 0;
+            $modules = $modulesByCourse[(int) $course['id']] ?? [];
+            $previousModulePassed = true;
 
             foreach ($modules as &$module) {
-                // Contar aulas do módulo
-                $lessons = Lesson::where('module_id', $module['id']);
-                $module['lessons_count'] = count($lessons);
-                $module['lessons_completed'] = 0;
+                $passed = (bool) $module['passed'];
 
-                // Progresso do usuário nas aulas deste módulo
-                foreach ($lessons as $lesson) {
-                    $progress = UserLessonProgress::firstWhereAll([
-                        'user_id' => $user['id'],
-                        'lesson_id' => $lesson['id']
-                    ]);
-                    if ($progress && $progress['completed']) {
-                        $module['lessons_completed']++;
-                        $completedLessons++;
-                    }
-                    $totalLessons++;
+                if ($passed) {
+                    $module['status'] = 'completed';
+                } elseif ($previousModulePassed) {
+                    $module['status'] = 'active';
+                } else {
+                    $module['status'] = 'locked';
                 }
+
+                $module['lessons_count'] = (int) $module['lessons_count'];
+                $module['lessons_completed'] = (int) $module['lessons_completed'];
+                unset($module['passed']);
+
+                $previousModulePassed = $passed;
             }
-            unset($module); // evita que a referência do último item do foreach vaze para o restante do código
+            unset($module);
 
             $courseData[] = [
                 'course' => $course,
-                'modules' => $modules
+                'modules' => $modules,
             ];
         }
 
         $this->view('dashboard/index', [
             'courses' => $courseData,
-            'user' => $user
+            'user' => $user,
         ]);
     }
 }
