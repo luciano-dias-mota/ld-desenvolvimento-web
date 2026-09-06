@@ -1,10 +1,14 @@
 <div class="breadcrumb">
-    <a href="<?= url('/dashboard') ?>">Mapa da Jornada</a> /
+    <a href="<?= url('/dashboard') ?>">Mapa da Jornada</a>
+    <span>/</span>
     <a href="<?= url('/cursos/' . $course['slug'] . '/' . $module['slug']) ?>"><?= e($module['title']) ?></a>
 </div>
 
-<h1><?= e($test['title']) ?></h1>
-<p>Fase: <?= e($module['title']) ?> &mdash; você precisa de <?= (int) $test['passing_score'] ?>% de acertos para avançar.</p>
+<div class="page-heading">
+    <span class="page-kicker">Boss Challenge</span>
+    <h1><?= e($test['title']) ?></h1>
+    <p>Fase: <?= e($module['title']) ?> — você precisa de <strong><?= (int) $test['passing_score'] ?>%</strong> de acertos para avançar.</p>
+</div>
 
 <?php if (!empty($resultado)): ?>
     <div class="result-banner <?= $passed ? '' : 'is-wrong' ?>">
@@ -13,7 +17,7 @@
             : "✗ Você fez {$score}%. Precisa de " . (int) $test['passing_score'] . "% para passar. Revise as aulas e tente de novo." ?>
     </div>
 
-    <div style="display:flex; gap:14px; margin-bottom:40px;">
+    <div class="actions-row" style="margin-bottom:40px;">
         <?php if ($passed): ?>
             <a href="<?= url('/dashboard') ?>" class="btn btn-success">Voltar ao mapa da jornada</a>
         <?php else: ?>
@@ -26,9 +30,10 @@
     <?= csrf_field() ?>
 
     <?php foreach ($questions as $i => $q): ?>
-        <div class="panel" style="margin-bottom:18px;">
-            <h3 style="margin-bottom:14px;"><?= $i + 1 ?>. <?= e($q['question']) ?></h3>
+        <div class="panel question-card">
+            <h3><span class="question-number"><?= $i + 1 ?>.</span> <?= e($q['question']) ?></h3>
             <?php $options = json_decode($q['options'], true); ?>
+
             <?php foreach ($options as $letra => $texto): ?>
                 <label class="quiz-option">
                     <input type="radio" name="respostas[<?= (int) $q['id'] ?>]" value="<?= e($letra) ?>" required>
@@ -38,7 +43,7 @@
         </div>
     <?php endforeach; ?>
 
-    <button type="submit" class="btn btn-success" style="margin-bottom:60px;">Enviar prova</button>
+    <button type="submit" class="btn btn-success" style="margin-bottom:60px;">Finalizar prova</button>
 </form>
 
 <?php endif; ?>
