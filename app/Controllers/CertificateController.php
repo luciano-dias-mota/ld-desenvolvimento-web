@@ -3,13 +3,12 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
-use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\User;
 
-class CertificateController extends Controller
+class CertificateController extends LearningController
 {
     public function show(string $courseSlug): void
     {
@@ -19,44 +18,50 @@ class CertificateController extends Controller
         }
 
         $course = Course::firstWhere('slug', $courseSlug);
+        if (!$course) {
+            $this->notFound();
+        }
+
+        // GET é somente leitura. Emissão acontece em POST (prova ou /emitir).
+        $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
+        if (!$certificate) {
+            Session::flash('error', 'Este certificado ainda não foi emitido.');
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
+        }
+
+        $this->view('certificado/show', compact('course', 'user', 'certificate'));
+    }
+
+    public function issue(string $courseSlug): void
+    {
+        $user = Auth::user();
+        if (!$user) {
+            $this->redirect('/login');
+        }
+
+        if (!$this->validateCsrf()) {
+            Session::flash('error', 'Sessão expirada. Recarregue a página e tente novamente.');
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
+        }
+
+        $course = Course::firstWhere('slug', $courseSlug);
         if (!$course || ($course['status'] ?? '') !== 'published') {
             $this->notFound();
         }
 
-        if (!$this->isEligibleForCertificate((int) $user['id'], (int) $course['id'])) {
+        $existing = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
+        if ($existing) {
+            $this->redirect('/certificado/' . rawurlencode($courseSlug));
+        }
+
+        if (!$this->progress()->isCourseComplete((int) $user['id'], (int) $course['id'])) {
             Session::flash('error', 'Conclua todas as aulas e provas do curso antes de emitir o certificado.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
-        $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
-
-        if (!$certificate) {
-            $this->db->beginTransaction();
-
-            try {
-                $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
-                $stmt->execute([$user['id']]);
-
-                $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
-                if (!$certificate) {
-                    Certificate::createCertificate((int) $user['id'], (int) $course['id']);
-                    $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
-                }
-
-                $this->db->commit();
-            } catch (\Throwable $e) {
-                if ($this->db->inTransaction()) {
-                    $this->db->rollBack();
-                }
-                throw $e;
-            }
-        }
-
-        if (!$certificate) {
-            throw new \RuntimeException('Não foi possível gerar o certificado.');
-        }
-
-        $this->view('certificado/show', compact('course', 'user', 'certificate'));
+        Certificate::createCertificate((int) $user['id'], (int) $course['id']);
+        Session::flash('success', 'Certificado emitido com sucesso.');
+        $this->redirect('/certificado/' . rawurlencode($courseSlug));
     }
 
     public function validar(string $code): void
@@ -67,8 +72,11 @@ class CertificateController extends Controller
             return;
         }
 
-        $stmt = $this->db->prepare(
-            'SELECT * FROM certificates WHERE certificate_code = ? LIMIT 1'
+        $stmt = $this->db()->prepare(
+            'SELECT id, user_id, course_id, certificate_code, issued_at
+             FROM certificates
+             WHERE certificate_code = ?
+             LIMIT 1'
         );
         $stmt->execute([$code]);
         $certificate = $stmt->fetch();
@@ -78,39 +86,15 @@ class CertificateController extends Controller
             return;
         }
 
-        $user = User::find((int) $certificate['user_id']);
+        $user = User::findPublicById((int) $certificate['user_id']);
         $course = Course::find((int) $certificate['course_id']);
 
-        if (!$user || !$course || !$this->isEligibleForCertificate((int) $user['id'], (int) $course['id'])) {
+        // Certificado emitido é fato histórico; não revalida progresso atual.
+        if (!$user || !$course) {
             $this->view('certificado/validar', ['certificate' => null]);
             return;
         }
 
-        // Compatibilidade com a view antiga, que usava $certificate['code'].
-        $certificate['code'] = $certificate['certificate_code'];
-
         $this->view('certificado/validar', compact('certificate', 'user', 'course'));
-    }
-
-    private function isEligibleForCertificate(int $userId, int $courseId): bool
-    {
-        $stmt = $this->db->prepare(
-            'SELECT id FROM modules WHERE course_id = ? ORDER BY module_number ASC, id ASC'
-        );
-        $stmt->execute([$courseId]);
-        $moduleIds = array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
-
-        if ($moduleIds === []) {
-            return false;
-        }
-
-        foreach ($moduleIds as $moduleId) {
-            if (!$this->hasCompletedAllLessons($userId, $moduleId)
-                || !$this->hasPassedModule($userId, $moduleId)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

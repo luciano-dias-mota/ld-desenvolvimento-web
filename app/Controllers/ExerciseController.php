@@ -3,14 +3,13 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
-use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Course;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
 
-class ExerciseController extends Controller
+class ExerciseController extends LearningController
 {
     public function show(string $courseSlug, string $moduleSlug, string $lessonSlug): void
     {
@@ -19,14 +18,14 @@ class ExerciseController extends Controller
             $this->redirect('/login');
         }
 
-        [$course, $module, $lesson, $exercise] = $this->resolveExercise($courseSlug, $moduleSlug, $lessonSlug);
+        [$course, $module, $lesson, $exercise] = $this->resolveExercise($courseSlug, $moduleSlug, $lessonSlug, false);
 
         if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo ainda está bloqueado.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             'SELECT answer, is_correct, xp_earned
              FROM user_exercise_submissions
              WHERE user_id = ? AND exercise_id = ?
@@ -41,10 +40,9 @@ class ExerciseController extends Controller
             ? (bool) $submission['is_correct']
             : null;
 
-        // A view antiga exibe exercise.xp_reward no resultado. Ajustamos para mostrar
-        // o XP efetivamente recebido nesta tentativa, evitando informar recompensa duplicada.
-        if ($submission !== false && $submission !== null) {
-            $exercise['xp_reward'] = (int) ($submission['xp_earned'] ?? 0);
+        $result = Session::flash('exercise_result');
+        if (!is_array($result) || (int) ($result['exercise_id'] ?? 0) !== (int) $exercise['id']) {
+            $result = null;
         }
 
         $options = json_decode((string) ($exercise['options'] ?? ''), true);
@@ -54,7 +52,7 @@ class ExerciseController extends Controller
 
         $this->view(
             'exercicios/show',
-            compact('course', 'module', 'lesson', 'exercise', 'options', 'answer', 'isCorrect')
+            compact('course', 'module', 'lesson', 'exercise', 'options', 'answer', 'isCorrect', 'result', 'submission')
         );
     }
 
@@ -70,11 +68,11 @@ class ExerciseController extends Controller
             $this->redirect('/exercicios/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
         }
 
-        [$course, $module, $lesson, $exercise] = $this->resolveExercise($courseSlug, $moduleSlug, $lessonSlug);
+        [$course, $module, $lesson, $exercise] = $this->resolveExercise($courseSlug, $moduleSlug, $lessonSlug, true);
 
         if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo ainda está bloqueado.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
         $answer = trim((string) ($_POST['resposta'] ?? ''));
@@ -89,32 +87,37 @@ class ExerciseController extends Controller
         if (in_array($type, ['multiple_choice', 'true_false'], true)) {
             $isCorrect = $answer === $correctAnswer;
         } else {
-            // Para exercícios textuais/código, mantém comparação determinística exata,
-            // normalizando apenas espaços externos e finais de linha.
             $normalizedAnswer = str_replace(["\r\n", "\r"], "\n", $answer);
             $normalizedCorrect = str_replace(["\r\n", "\r"], "\n", $correctAnswer);
             $isCorrect = $normalizedAnswer === $normalizedCorrect;
         }
 
-        $this->db->beginTransaction();
+        $exerciseXpEarned = 0;
+        $lessonXpEarned = 0;
+
+        $this->db()->beginTransaction();
 
         try {
-            $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+            // Serializa os ganhos de XP do usuário e evita premiações duplicadas.
+            $stmt = $this->db()->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
             $stmt->execute([$user['id']]);
+            if (!$stmt->fetchColumn()) {
+                throw new \RuntimeException('Usuário não encontrado.');
+            }
 
-            $stmt = $this->db->prepare(
+            $stmt = $this->db()->prepare(
                 'SELECT 1
                  FROM user_exercise_submissions
                  WHERE user_id = ? AND exercise_id = ? AND is_correct = 1
                  LIMIT 1'
             );
             $stmt->execute([$user['id'], $exercise['id']]);
-            $alreadyRewarded = (bool) $stmt->fetchColumn();
+            $alreadyRewardedExercise = (bool) $stmt->fetchColumn();
 
-            $xpReward = max(0, (int) ($exercise['xp_reward'] ?? 0));
-            $xpEarned = ($isCorrect && !$alreadyRewarded) ? $xpReward : 0;
+            $exerciseXpReward = max(0, (int) ($exercise['xp_reward'] ?? 0));
+            $exerciseXpEarned = ($isCorrect && !$alreadyRewardedExercise) ? $exerciseXpReward : 0;
 
-            $stmt = $this->db->prepare(
+            $stmt = $this->db()->prepare(
                 'INSERT INTO user_exercise_submissions
                     (user_id, exercise_id, answer, is_correct, xp_earned, submitted_at)
                  VALUES (?, ?, ?, ?, ?, NOW())'
@@ -124,16 +127,11 @@ class ExerciseController extends Controller
                 $exercise['id'],
                 $answer,
                 (int) $isCorrect,
-                $xpEarned,
+                $exerciseXpEarned,
             ]);
 
             if ($isCorrect) {
-                if ($xpEarned > 0) {
-                    $stmt = $this->db->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
-                    $stmt->execute([$xpEarned, $user['id']]);
-                }
-
-                $stmt = $this->db->prepare(
+                $stmt = $this->db()->prepare(
                     'SELECT id, completed
                      FROM user_lesson_progress
                      WHERE user_id = ? AND lesson_id = ?
@@ -143,37 +141,53 @@ class ExerciseController extends Controller
                 $stmt->execute([$user['id'], $lesson['id']]);
                 $progress = $stmt->fetch();
 
-                if ($progress) {
-                    if (!(bool) $progress['completed']) {
-                        $stmt = $this->db->prepare(
+                if (!$progress || !(bool) $progress['completed']) {
+                    $lessonXpEarned = max(0, (int) ($lesson['xp_reward'] ?? 0));
+
+                    if ($progress) {
+                        $stmt = $this->db()->prepare(
                             'UPDATE user_lesson_progress
-                             SET completed = 1, completed_at = NOW()
+                             SET completed = 1, completed_at = NOW(), xp_earned = ?
                              WHERE id = ?'
                         );
-                        $stmt->execute([$progress['id']]);
+                        $stmt->execute([$lessonXpEarned, $progress['id']]);
+                    } else {
+                        $stmt = $this->db()->prepare(
+                            'INSERT INTO user_lesson_progress
+                                (user_id, lesson_id, completed, completed_at, xp_earned)
+                             VALUES (?, ?, 1, NOW(), ?)'
+                        );
+                        $stmt->execute([$user['id'], $lesson['id'], $lessonXpEarned]);
                     }
-                } else {
-                    $stmt = $this->db->prepare(
-                        'INSERT INTO user_lesson_progress
-                            (user_id, lesson_id, completed, completed_at, xp_earned)
-                         VALUES (?, ?, 1, NOW(), ?)'
-                    );
-                    $stmt->execute([$user['id'], $lesson['id'], $xpEarned]);
+                }
+
+                $totalXpEarned = $exerciseXpEarned + $lessonXpEarned;
+                if ($totalXpEarned > 0) {
+                    $stmt = $this->db()->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
+                    $stmt->execute([$totalXpEarned, $user['id']]);
                 }
             }
 
-            $this->db->commit();
+            $this->db()->commit();
         } catch (\Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
+            if ($this->db()->inTransaction()) {
+                $this->db()->rollBack();
             }
             throw $e;
         }
 
+        Session::flash('exercise_result', [
+            'exercise_id' => (int) $exercise['id'],
+            'correct' => $isCorrect,
+            'exercise_xp' => $exerciseXpEarned,
+            'lesson_xp' => $lessonXpEarned,
+            'total_xp' => $exerciseXpEarned + $lessonXpEarned,
+        ]);
+
         $this->redirect('/exercicios/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
     }
 
-    private function resolveExercise(string $courseSlug, string $moduleSlug, string $lessonSlug): array
+    private function resolveExercise(string $courseSlug, string $moduleSlug, string $lessonSlug, bool $includeAnswer): array
     {
         $course = Course::firstWhere('slug', $courseSlug);
         if (!$course || ($course['status'] ?? '') !== 'published') {
@@ -183,6 +197,7 @@ class ExerciseController extends Controller
         $module = Module::firstWhereAll([
             'course_id' => $course['id'],
             'slug' => $moduleSlug,
+            'status' => 'published',
         ]);
         if (!$module) {
             $this->notFound();
@@ -196,8 +211,21 @@ class ExerciseController extends Controller
             $this->notFound();
         }
 
-        $exercise = Exercise::firstWhere('lesson_id', $lesson['id']);
-        if (!$exercise || ($exercise['status'] ?? '') !== 'published') {
+        $columns = $includeAnswer
+            ? 'id, lesson_id, title, exercise_type, question, options, correct_answer, xp_reward, exercise_number, status'
+            : 'id, lesson_id, title, exercise_type, question, options, xp_reward, exercise_number, status';
+
+        $stmt = $this->db()->prepare(
+            "SELECT {$columns}
+             FROM exercises
+             WHERE lesson_id = ? AND status = 'published'
+             ORDER BY exercise_number ASC, id ASC
+             LIMIT 1"
+        );
+        $stmt->execute([$lesson['id']]);
+        $exercise = $stmt->fetch() ?: null;
+
+        if (!$exercise) {
             $this->redirect('/aulas/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
         }
 

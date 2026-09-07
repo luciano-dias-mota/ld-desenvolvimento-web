@@ -3,12 +3,11 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
-use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Course;
 use App\Models\Module;
 
-class CourseController extends Controller
+class CourseController extends LearningController
 {
     public function showModule(string $courseSlug, string $moduleSlug): void
     {
@@ -25,6 +24,7 @@ class CourseController extends Controller
         $module = Module::firstWhereAll([
             'course_id' => $course['id'],
             'slug' => $moduleSlug,
+            'status' => 'published',
         ]);
         if (!$module) {
             $this->notFound();
@@ -32,10 +32,10 @@ class CourseController extends Controller
 
         if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo está bloqueado. Complete o módulo anterior primeiro.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT *
              FROM lessons
              WHERE module_id = ? AND status = 'published'
@@ -49,7 +49,7 @@ class CourseController extends Controller
             $lessonIds = array_map(static fn(array $lesson): int => (int) $lesson['id'], $lessons);
             $placeholders = implode(',', array_fill(0, count($lessonIds), '?'));
 
-            $stmt = $this->db->prepare(
+            $stmt = $this->db()->prepare(
                 "SELECT lesson_id, completed
                  FROM user_lesson_progress
                  WHERE user_id = ? AND lesson_id IN ({$placeholders})"
@@ -66,7 +66,7 @@ class CourseController extends Controller
         }
         unset($lesson);
 
-        $module['status'] = $this->hasPassedModule((int) $user['id'], (int) $module['id'])
+        $module['progress_status'] = $this->hasPassedModule((int) $user['id'], (int) $module['id'])
             ? 'completed'
             : 'active';
 

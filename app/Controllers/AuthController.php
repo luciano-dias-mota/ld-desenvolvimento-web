@@ -6,12 +6,11 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Session;
 use App\Models\User;
+use App\Services\LoginThrottle;
 
 class AuthController extends Controller
 {
-    private const LOGIN_MAX_ATTEMPTS = 5;
-    private const LOGIN_WINDOW_SECONDS = 300;
-    private const LOGIN_LOCK_SECONDS = 300;
+    private ?LoginThrottle $throttle = null;
 
     public function showLoginForm(): void
     {
@@ -25,27 +24,27 @@ class AuthController extends Controller
             $this->redirect('/login');
         }
 
-        if ($this->isLoginLocked()) {
+        $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+        $password = (string) ($_POST['password'] ?? '');
+
+        if ($this->throttle()->isBlocked($email)) {
             Session::flash('error', 'Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.');
             $this->redirect('/login');
         }
 
-        $email = strtolower(trim((string) ($_POST['email'] ?? '')));
-        $password = (string) ($_POST['password'] ?? '');
-
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
-            $this->recordFailedLogin();
+            $this->throttle()->recordFailure($email);
             Session::flash('error', 'Credenciais inválidas.');
             $this->redirect('/login');
         }
 
         if (!Auth::attempt($email, $password)) {
-            $this->recordFailedLogin();
+            $this->throttle()->recordFailure($email);
             Session::flash('error', 'Credenciais inválidas.');
             $this->redirect('/login');
         }
 
-        $this->clearLoginAttempts();
+        $this->throttle()->clear($email);
         $this->redirect('/dashboard');
     }
 
@@ -82,7 +81,7 @@ class AuthController extends Controller
             $this->redirect('/register');
         }
 
-        if (User::firstWhere('email', $email)) {
+        if (User::emailExists($email)) {
             Session::flash('error', 'Não foi possível criar a conta com os dados informados.');
             $this->redirect('/register');
         }
@@ -97,7 +96,7 @@ class AuthController extends Controller
             ]);
         } catch (\PDOException $e) {
             error_log('Erro ao cadastrar usuário: ' . $e->getMessage());
-            Session::flash('error', 'Não foi possível criar a conta. Verifique os dados e tente novamente.');
+            Session::flash('error', 'Não foi possível criar a conta com os dados informados.');
             $this->redirect('/register');
         }
 
@@ -121,49 +120,12 @@ class AuthController extends Controller
         $this->redirect('/login');
     }
 
-    private function isLoginLocked(): bool
+    private function throttle(): LoginThrottle
     {
-        $state = Session::get('login_attempts', []);
-        if (!is_array($state)) {
-            return false;
+        if ($this->throttle === null) {
+            $this->throttle = new LoginThrottle($this->db());
         }
 
-        $lockedUntil = (int) ($state['locked_until'] ?? 0);
-        if ($lockedUntil > time()) {
-            return true;
-        }
-
-        if ($lockedUntil > 0) {
-            $this->clearLoginAttempts();
-        }
-
-        return false;
-    }
-
-    private function recordFailedLogin(): void
-    {
-        $now = time();
-        $state = Session::get('login_attempts', []);
-
-        if (!is_array($state) || ($now - (int) ($state['first_at'] ?? 0)) > self::LOGIN_WINDOW_SECONDS) {
-            $state = [
-                'count' => 0,
-                'first_at' => $now,
-                'locked_until' => 0,
-            ];
-        }
-
-        $state['count'] = (int) ($state['count'] ?? 0) + 1;
-
-        if ($state['count'] >= self::LOGIN_MAX_ATTEMPTS) {
-            $state['locked_until'] = $now + self::LOGIN_LOCK_SECONDS;
-        }
-
-        Session::set('login_attempts', $state);
-    }
-
-    private function clearLoginAttempts(): void
-    {
-        Session::remove('login_attempts');
+        return $this->throttle;
     }
 }

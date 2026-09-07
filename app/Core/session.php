@@ -14,6 +14,17 @@ class Session
         ini_set('session.use_only_cookies', '1');
         ini_set('session.cookie_httponly', '1');
 
+        $sessionName = (string) ($_ENV['SESSION_NAME'] ?? getenv('SESSION_NAME') ?: 'ldweb_session');
+        if (!preg_match('/^[A-Za-z0-9_-]{1,64}$/', $sessionName)) {
+            $sessionName = 'ldweb_session';
+        }
+        session_name($sessionName);
+
+        $idleMinutes = max(1, (int) ($_ENV['SESSION_LIFETIME'] ?? getenv('SESSION_LIFETIME') ?: 120));
+        $absoluteMinutes = max($idleMinutes, (int) ($_ENV['SESSION_ABSOLUTE_LIFETIME'] ?? getenv('SESSION_ABSOLUTE_LIFETIME') ?: 480));
+        $regenerateMinutes = max(5, (int) ($_ENV['SESSION_REGENERATE_MINUTES'] ?? getenv('SESSION_REGENERATE_MINUTES') ?: 15));
+        ini_set('session.gc_maxlifetime', (string) ($absoluteMinutes * 60));
+
         $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443);
 
@@ -22,15 +33,45 @@ class Session
             ? filter_var($envSecure, FILTER_VALIDATE_BOOLEAN)
             : $https;
 
+        $cookiePath = Url::basePath();
+        if ($cookiePath === '') {
+            $cookiePath = '/';
+        }
+
         session_set_cookie_params([
             'lifetime' => 0,
-            'path' => '/',
+            'path' => $cookiePath,
             'secure' => $secure,
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
 
         session_start();
+
+        $now = time();
+        $startedAt = (int) ($_SESSION['_session_started_at'] ?? $now);
+        $lastActivity = (int) ($_SESSION['_session_last_activity'] ?? $now);
+
+        $idleExpired = ($now - $lastActivity) > ($idleMinutes * 60);
+        $absoluteExpired = ($now - $startedAt) > ($absoluteMinutes * 60);
+
+        if ($idleExpired || $absoluteExpired) {
+            self::destroy();
+            session_start();
+            $_SESSION['_session_started_at'] = $now;
+            $_SESSION['_session_last_activity'] = $now;
+            $_SESSION['_session_last_regenerated'] = $now;
+            return;
+        }
+
+        $_SESSION['_session_started_at'] = $startedAt;
+        $_SESSION['_session_last_activity'] = $now;
+
+        $lastRegenerated = (int) ($_SESSION['_session_last_regenerated'] ?? $startedAt);
+        if (($now - $lastRegenerated) >= ($regenerateMinutes * 60)) {
+            session_regenerate_id(true);
+            $_SESSION['_session_last_regenerated'] = $now;
+        }
     }
 
     public static function set(string $key, mixed $value): void
@@ -45,7 +86,7 @@ class Session
 
     public static function has(string $key): bool
     {
-        return isset($_SESSION[$key]);
+        return array_key_exists($key, $_SESSION);
     }
 
     public static function remove(string $key): void
@@ -83,13 +124,18 @@ class Session
 
     public static function flash(string $key, mixed $value = null): mixed
     {
-        if ($value !== null) {
+        if (func_num_args() === 2) {
             self::set('flash_' . $key, $value);
             return null;
         }
 
-        $flash = self::get('flash_' . $key);
-        self::remove('flash_' . $key);
+        $flashKey = 'flash_' . $key;
+        if (!array_key_exists($flashKey, $_SESSION)) {
+            return null;
+        }
+
+        $flash = $_SESSION[$flashKey];
+        unset($_SESSION[$flashKey]);
         return $flash;
     }
 }

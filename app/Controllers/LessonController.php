@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
-use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Course;
 use App\Models\Exercise;
@@ -11,7 +10,7 @@ use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\UserLessonProgress;
 
-class LessonController extends Controller
+class LessonController extends LearningController
 {
     public function show(string $courseSlug, string $moduleSlug, string $lessonSlug): void
     {
@@ -24,7 +23,7 @@ class LessonController extends Controller
 
         if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo ainda está bloqueado.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
         $progress = UserLessonProgress::firstWhereAll([
@@ -33,12 +32,12 @@ class LessonController extends Controller
         ]);
         $completed = $progress !== null && (bool) $progress['completed'];
 
-        $exercise = Exercise::firstWhere('lesson_id', $lesson['id']);
-        if ($exercise && ($exercise['status'] ?? 'published') !== 'published') {
-            $exercise = null;
-        }
+        $exercise = Exercise::firstWhereAll([
+            'lesson_id' => $lesson['id'],
+            'status' => 'published',
+        ]);
 
-        $stmt = $this->db->prepare(
+        $stmt = $this->db()->prepare(
             "SELECT *
              FROM lessons
              WHERE module_id = ?
@@ -69,17 +68,28 @@ class LessonController extends Controller
 
         if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo ainda está bloqueado.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
-        $this->db->beginTransaction();
+        // Aulas com exercício só podem ser concluídas ao acertar o exercício.
+        // Isso evita pular o desafio enviando um POST direto para /concluir.
+        $exercise = Exercise::firstWhereAll([
+            'lesson_id' => $lesson['id'],
+            'status' => 'published',
+        ]);
+        if ($exercise) {
+            Session::flash('error', 'Conclua o exercício de fixação para finalizar esta aula.');
+            $this->redirect('/exercicios/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
+        }
+
+        $this->db()->beginTransaction();
 
         try {
             // Serializa alterações de XP do mesmo usuário e evita duplo clique concorrente.
-            $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+            $stmt = $this->db()->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
             $stmt->execute([$user['id']]);
 
-            $stmt = $this->db->prepare(
+            $stmt = $this->db()->prepare(
                 'SELECT id, completed
                  FROM user_lesson_progress
                  WHERE user_id = ? AND lesson_id = ?
@@ -90,7 +100,7 @@ class LessonController extends Controller
             $progress = $stmt->fetch();
 
             if ($progress && (bool) $progress['completed']) {
-                $this->db->commit();
+                $this->db()->commit();
                 Session::flash('success', 'Esta aula já estava concluída.');
                 $this->redirect('/aulas/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug) . '/' . rawurlencode($lessonSlug));
             }
@@ -98,14 +108,14 @@ class LessonController extends Controller
             $xpReward = max(0, (int) ($lesson['xp_reward'] ?? 0));
 
             if ($progress) {
-                $stmt = $this->db->prepare(
+                $stmt = $this->db()->prepare(
                     'UPDATE user_lesson_progress
                      SET completed = 1, completed_at = NOW(), xp_earned = ?
                      WHERE id = ?'
                 );
                 $stmt->execute([$xpReward, $progress['id']]);
             } else {
-                $stmt = $this->db->prepare(
+                $stmt = $this->db()->prepare(
                     'INSERT INTO user_lesson_progress
                         (user_id, lesson_id, completed, completed_at, xp_earned)
                      VALUES (?, ?, 1, NOW(), ?)'
@@ -114,15 +124,15 @@ class LessonController extends Controller
             }
 
             if ($xpReward > 0) {
-                $stmt = $this->db->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
+                $stmt = $this->db()->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
                 $stmt->execute([$xpReward, $user['id']]);
             }
 
-            $this->db->commit();
+            $this->db()->commit();
             Session::flash('success', 'Aula concluída! +' . $xpReward . ' XP.');
         } catch (\Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
+            if ($this->db()->inTransaction()) {
+                $this->db()->rollBack();
             }
             throw $e;
         }
@@ -140,6 +150,7 @@ class LessonController extends Controller
         $module = Module::firstWhereAll([
             'course_id' => $course['id'],
             'slug' => $moduleSlug,
+            'status' => 'published',
         ]);
         if (!$module) {
             $this->notFound();

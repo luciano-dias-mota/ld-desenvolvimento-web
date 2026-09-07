@@ -6,6 +6,7 @@ class Router
 {
     private array $routes = [];
     private int $currentRoute = 0;
+    private array $middlewareMap = [];
 
     public function get(string $path, string $controllerAction): self
     {
@@ -15,6 +16,21 @@ class Router
     public function post(string $path, string $controllerAction): self
     {
         return $this->addRoute('POST', $path, $controllerAction);
+    }
+
+    public function put(string $path, string $controllerAction): self
+    {
+        return $this->addRoute('PUT', $path, $controllerAction);
+    }
+
+    public function patch(string $path, string $controllerAction): self
+    {
+        return $this->addRoute('PATCH', $path, $controllerAction);
+    }
+
+    public function delete(string $path, string $controllerAction): self
+    {
+        return $this->addRoute('DELETE', $path, $controllerAction);
     }
 
     private function addRoute(string $method, string $path, string $controllerAction): self
@@ -30,11 +46,22 @@ class Router
         $this->routes[] = [
             'method' => strtoupper($method),
             'path' => $path,
+            'pattern' => $this->compilePattern($path),
             'controllerAction' => $controllerAction,
             'middlewares' => [],
         ];
 
         $this->currentRoute = array_key_last($this->routes);
+        return $this;
+    }
+
+    public function registerMiddleware(string $name, string $class): self
+    {
+        if ($name === '' || !class_exists($class)) {
+            throw new \InvalidArgumentException('Middleware inválido: ' . $name);
+        }
+
+        $this->middlewareMap[$name] = $class;
         return $this;
     }
 
@@ -52,30 +79,30 @@ class Router
     {
         $path = parse_url($uri, PHP_URL_PATH) ?: '/';
         $path = rawurldecode($path);
+        $method = strtoupper($method);
 
-        $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
-        $basePath = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
-        if ($basePath !== '' && $basePath !== '.' && $basePath !== '/' && str_starts_with($path, $basePath . '/')) {
-            $path = substr($path, strlen($basePath));
+        $basePath = Url::basePath();
+        if ($basePath !== '') {
+            if ($path === $basePath) {
+                $path = '/';
+            } elseif (str_starts_with($path, $basePath . '/')) {
+                $path = substr($path, strlen($basePath));
+            }
         }
 
         if ($path !== '/') {
             $path = rtrim($path, '/');
         }
 
+        $allowedMethods = [];
+
         foreach ($this->routes as $route) {
-            if ($route['method'] !== strtoupper($method)) {
+            if (!preg_match($route['pattern'], $path, $matches)) {
                 continue;
             }
 
-            $pattern = preg_replace(
-                '#\{[a-zA-Z_][a-zA-Z0-9_]*\}#',
-                '([a-zA-Z0-9\-_]+)',
-                $route['path']
-            );
-            $pattern = '#^' . $pattern . '$#';
-
-            if (!preg_match($pattern, $path, $matches)) {
+            if ($route['method'] !== $method) {
+                $allowedMethods[] = $route['method'];
                 continue;
             }
 
@@ -101,50 +128,53 @@ class Router
             return;
         }
 
+        if ($allowedMethods !== []) {
+            $allowedMethods = array_values(array_unique($allowedMethods));
+            http_response_code(405);
+            header('Allow: ' . implode(', ', $allowedMethods));
+            echo 'Método não permitido.';
+            return;
+        }
+
         http_response_code(404);
         $controller = new \App\Controllers\ErrorController();
         $controller->notFound();
     }
 
+    private function compilePattern(string $path): string
+    {
+        $parts = preg_split(
+            '/(\{[A-Za-z_][A-Za-z0-9_]*\})/',
+            $path,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
+        );
+
+        $pattern = '';
+        foreach ($parts ?: [] as $part) {
+            if (preg_match('/^\{[A-Za-z_][A-Za-z0-9_]*\}$/', $part)) {
+                $pattern .= '([A-Za-z0-9\-_]+)';
+            } else {
+                $pattern .= preg_quote($part, '#');
+            }
+        }
+
+        return '#^' . $pattern . '$#';
+    }
+
     private function handleMiddleware(string $middleware): void
     {
-        switch ($middleware) {
-            case 'auth':
-                if (!Auth::check()) {
-                    $this->redirect('/login');
-                }
-                return;
-
-            case 'admin':
-                if (!Auth::check() || !Auth::isAdmin()) {
-                    http_response_code(403);
-                    echo 'Acesso negado.';
-                    exit;
-                }
-                return;
-
-            case 'guest':
-                if (Auth::check()) {
-                    $this->redirect('/dashboard');
-                }
-                return;
-
-            default:
-                throw new \RuntimeException('Middleware não reconhecido: ' . $middleware);
-        }
-    }
-
-    private function redirect(string $path): void
-    {
-        if (function_exists('url')) {
-            $location = url($path);
-        } else {
-            $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
-            $basePath = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
-            $location = (($basePath !== '' && $basePath !== '.' && $basePath !== '/') ? $basePath : '') . $path;
+        $class = $this->middlewareMap[$middleware] ?? null;
+        if (!is_string($class) || !class_exists($class)) {
+            throw new \RuntimeException('Middleware não reconhecido: ' . $middleware);
         }
 
-        header('Location: ' . $location, true, 302);
-        exit;
+        $instance = new $class();
+        if (!is_callable([$instance, 'handle'])) {
+            throw new \RuntimeException('Middleware sem método handle(): ' . $middleware);
+        }
+
+        $instance->handle();
     }
+
 }

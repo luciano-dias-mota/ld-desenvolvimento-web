@@ -3,9 +3,9 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
-use App\Core\Controller;
+use App\Models\Certificate;
 
-class DashboardController extends Controller
+class DashboardController extends LearningController
 {
     public function index(): void
     {
@@ -14,7 +14,7 @@ class DashboardController extends Controller
             $this->redirect('/login');
         }
 
-        $courses = $this->db
+        $courses = $this->db()
             ->query("SELECT * FROM courses WHERE status = 'published' ORDER BY id ASC")
             ->fetchAll();
 
@@ -44,22 +44,15 @@ class DashboardController extends Controller
                           AND l2.status = 'published'
                           AND ulp.user_id = ?
                           AND ulp.completed = 1
-                    ) AS lessons_completed,
-                    EXISTS(
-                        SELECT 1
-                        FROM module_tests mt
-                        INNER JOIN user_module_tests umt ON umt.module_test_id = mt.id
-                        WHERE mt.module_id = m.id
-                          AND umt.user_id = ?
-                          AND umt.passed = 1
-                    ) AS passed
+                    ) AS lessons_completed
                 FROM modules m
                 WHERE m.course_id IN ({$placeholders})
+                  AND m.status = 'published'
                 ORDER BY m.course_id ASC, m.module_number ASC, m.id ASC";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(array_merge([(int) $user['id'], (int) $user['id']], $courseIds));
-        $moduleRows = $stmt->fetchAll();
+        $stmt = $this->db()->prepare($sql);
+        $stmt->execute(array_merge([(int) $user['id']], $courseIds));
+        $moduleRows = $this->progress()->decorateModuleStatuses((int) $user['id'], $stmt->fetchAll());
 
         $modulesByCourse = [];
         foreach ($moduleRows as $module) {
@@ -69,30 +62,32 @@ class DashboardController extends Controller
         $courseData = [];
         foreach ($courses as $course) {
             $modules = $modulesByCourse[(int) $course['id']] ?? [];
-            $previousModulePassed = true;
+            $allPublishedModulesPassed = $modules !== [];
 
             foreach ($modules as &$module) {
-                $passed = (bool) $module['passed'];
-
-                if ($passed) {
-                    $module['status'] = 'completed';
-                } elseif ($previousModulePassed) {
-                    $module['status'] = 'active';
-                } else {
-                    $module['status'] = 'locked';
-                }
-
                 $module['lessons_count'] = (int) $module['lessons_count'];
                 $module['lessons_completed'] = (int) $module['lessons_completed'];
-                unset($module['passed']);
 
-                $previousModulePassed = $passed;
+                $moduleFullyCompleted = ($module['progress_status'] ?? 'locked') === 'completed'
+                    && $module['lessons_count'] > 0
+                    && $module['lessons_completed'] >= $module['lessons_count'];
+
+                if (!$moduleFullyCompleted) {
+                    $allPublishedModulesPassed = false;
+                }
             }
             unset($module);
+
+            // Certificados já emitidos permanecem acessíveis mesmo se o curso
+            // receber novos conteúdos posteriormente.
+            $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
 
             $courseData[] = [
                 'course' => $course,
                 'modules' => $modules,
+                'completed' => $allPublishedModulesPassed || $certificate !== null,
+                'can_issue_certificate' => $allPublishedModulesPassed && $certificate === null,
+                'certificate' => $certificate,
             ];
         }
 

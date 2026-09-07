@@ -3,14 +3,13 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
-use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\Module;
 use App\Models\ModuleTest;
 
-class ModuleTestController extends Controller
+class ModuleTestController extends LearningController
 {
     public function show(string $courseSlug, string $moduleSlug): void
     {
@@ -23,7 +22,7 @@ class ModuleTestController extends Controller
 
         if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo ainda está bloqueado.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
         if (!$this->hasCompletedAllLessons((int) $user['id'], (int) $module['id'])) {
@@ -33,25 +32,17 @@ class ModuleTestController extends Controller
 
         if ($this->hasPassedModule((int) $user['id'], (int) $module['id'])) {
             Session::flash('success', 'Você já foi aprovado neste módulo.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
-        $stmt = $this->db->prepare(
-            'SELECT *
-             FROM test_questions
-             WHERE module_test_id = ?
-             ORDER BY question_number ASC, id ASC'
-        );
-        $stmt->execute([$test['id']]);
-        $questions = $stmt->fetchAll();
-
-        if ($questions === []) {
-            Session::flash('error', 'A prova deste módulo ainda não possui questões.');
-            $this->redirect('/cursos/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug));
-        }
+        $maxAttempts = isset($test['max_attempts']) && $test['max_attempts'] !== null
+            ? max(0, (int) $test['max_attempts'])
+            : 0;
+        $attemptCount = $this->countAttempts((int) $user['id'], (int) $test['id']);
 
         // Resultado é flash: aparece uma vez após a tentativa reprovada.
-        // Ao clicar em "Tentar novamente", a mesma URL volta a exibir o formulário.
+        // Ele é lido antes do bloqueio por limite para que a última tentativa
+        // ainda mostre a nota ao aluno.
         $testResult = Session::flash('test_result');
         $resultado = null;
         $passed = false;
@@ -64,9 +55,40 @@ class ModuleTestController extends Controller
             $score = (float) ($testResult['score'] ?? 0);
         }
 
+        $canRetry = $maxAttempts === 0 || $attemptCount < $maxAttempts;
+        if (!$canRetry && $resultado === null) {
+            Session::flash('error', 'Você atingiu o limite de tentativas desta prova.');
+            $this->redirect('/cursos/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug));
+        }
+
+        $stmt = $this->db()->prepare(
+            'SELECT id, module_test_id, question, question_type, options, points, question_number
+             FROM test_questions
+             WHERE module_test_id = ?
+             ORDER BY question_number ASC, id ASC'
+        );
+        $stmt->execute([$test['id']]);
+        $questions = $stmt->fetchAll();
+
+        if ($questions === []) {
+            Session::flash('error', 'A prova deste módulo ainda não possui questões.');
+            $this->redirect('/cursos/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug));
+        }
+
         $this->view(
             'cursos/prova',
-            compact('course', 'module', 'test', 'questions', 'resultado', 'passed', 'score')
+            compact(
+                'course',
+                'module',
+                'test',
+                'questions',
+                'resultado',
+                'passed',
+                'score',
+                'attemptCount',
+                'maxAttempts',
+                'canRetry'
+            )
         );
     }
 
@@ -86,7 +108,7 @@ class ModuleTestController extends Controller
 
         if (!$this->canAccessModule((int) $user['id'], $module)) {
             Session::flash('error', 'Este módulo ainda está bloqueado.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
         if (!$this->hasCompletedAllLessons((int) $user['id'], (int) $module['id'])) {
@@ -99,8 +121,8 @@ class ModuleTestController extends Controller
             $answers = [];
         }
 
-        $stmt = $this->db->prepare(
-            'SELECT *
+        $stmt = $this->db()->prepare(
+            'SELECT id, module_test_id, question, question_type, options, correct_answer, points, question_number
              FROM test_questions
              WHERE module_test_id = ?
              ORDER BY question_number ASC, id ASC'
@@ -138,14 +160,14 @@ class ModuleTestController extends Controller
         $passingScore = (float) $test['passing_score'];
         $passed = $score >= $passingScore;
 
-        $this->db->beginTransaction();
+        $this->db()->beginTransaction();
 
         try {
-            $stmt = $this->db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+            $stmt = $this->db()->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
             $stmt->execute([$user['id']]);
 
             // Revalida dentro da transação para impedir XP duplicado em envios simultâneos.
-            $stmt = $this->db->prepare(
+            $stmt = $this->db()->prepare(
                 'SELECT 1
                  FROM user_module_tests
                  WHERE user_id = ? AND module_test_id = ? AND passed = 1
@@ -153,22 +175,32 @@ class ModuleTestController extends Controller
             );
             $stmt->execute([$user['id'], $test['id']]);
             if ($stmt->fetchColumn()) {
-                $this->db->commit();
+                $this->db()->commit();
                 Session::flash('success', 'Você já havia sido aprovado neste módulo.');
-                $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+                $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
             }
 
-            $stmt = $this->db->prepare(
+            $stmt = $this->db()->prepare(
                 'SELECT COUNT(*)
                  FROM user_module_tests
                  WHERE user_id = ? AND module_test_id = ?'
             );
             $stmt->execute([$user['id'], $test['id']]);
-            $attemptNumber = (int) $stmt->fetchColumn() + 1;
+            $attemptCount = (int) $stmt->fetchColumn();
 
+            $maxAttempts = isset($test['max_attempts']) && $test['max_attempts'] !== null
+                ? max(0, (int) $test['max_attempts'])
+                : 0;
+            if ($maxAttempts > 0 && $attemptCount >= $maxAttempts) {
+                $this->db()->commit();
+                Session::flash('error', 'Você atingiu o limite de tentativas desta prova.');
+                $this->redirect('/cursos/' . rawurlencode($courseSlug) . '/' . rawurlencode($moduleSlug));
+            }
+
+            $attemptNumber = $attemptCount + 1;
             $xpEarned = $passed ? max(0, (int) ($test['xp_reward'] ?? 0)) : 0;
 
-            $stmt = $this->db->prepare(
+            $stmt = $this->db()->prepare(
                 'INSERT INTO user_module_tests
                     (user_id, module_test_id, score, passed, xp_earned, attempt_number, started_at, completed_at)
                  VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())'
@@ -183,30 +215,30 @@ class ModuleTestController extends Controller
             ]);
 
             if ($passed && $xpEarned > 0) {
-                $stmt = $this->db->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
+                $stmt = $this->db()->prepare('UPDATE users SET xp = xp + ? WHERE id = ?');
                 $stmt->execute([$xpEarned, $user['id']]);
             }
 
             // Não altera modules.status. O próximo módulo é liberado individualmente
             // pela aprovação registrada em user_module_tests.
-            if ($passed && $this->allCourseModulesPassed((int) $user['id'], (int) $course['id'])) {
+            if ($passed && $this->progress()->isCourseComplete((int) $user['id'], (int) $course['id'])) {
                 $certificate = Certificate::getUserCertificate((int) $user['id'], (int) $course['id']);
                 if (!$certificate) {
                     Certificate::createCertificate((int) $user['id'], (int) $course['id']);
                 }
             }
 
-            $this->db->commit();
+            $this->db()->commit();
         } catch (\Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
+            if ($this->db()->inTransaction()) {
+                $this->db()->rollBack();
             }
             throw $e;
         }
 
         if ($passed) {
             Session::flash('success', 'Aprovado com ' . $score . '%! Próxima fase liberada.');
-            $this->redirect('/dashboard?curso=' . rawurlencode($courseSlug));
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
         Session::flash('test_result', [
@@ -228,6 +260,7 @@ class ModuleTestController extends Controller
         $module = Module::firstWhereAll([
             'course_id' => $course['id'],
             'slug' => $moduleSlug,
+            'status' => 'published',
         ]);
         if (!$module) {
             $this->notFound();
@@ -242,24 +275,13 @@ class ModuleTestController extends Controller
         return [$course, $module, $test];
     }
 
-    private function allCourseModulesPassed(int $userId, int $courseId): bool
+    private function countAttempts(int $userId, int $testId): int
     {
-        $stmt = $this->db->prepare(
-            'SELECT id FROM modules WHERE course_id = ? ORDER BY module_number ASC, id ASC'
+        $stmt = $this->db()->prepare(
+            'SELECT COUNT(*) FROM user_module_tests WHERE user_id = ? AND module_test_id = ?'
         );
-        $stmt->execute([$courseId]);
-        $moduleIds = array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
-
-        if ($moduleIds === []) {
-            return false;
-        }
-
-        foreach ($moduleIds as $moduleId) {
-            if (!$this->hasPassedModule($userId, $moduleId)) {
-                return false;
-            }
-        }
-
-        return true;
+        $stmt->execute([$userId, $testId]);
+        return (int) $stmt->fetchColumn();
     }
+
 }

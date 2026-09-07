@@ -2,59 +2,62 @@
 
 namespace App\Core;
 
+use PDO;
+
 abstract class Controller
 {
-    protected \PDO $db;
+    private ?PDO $connection = null;
 
-    public function __construct()
+    protected function db(): PDO
     {
-        $this->db = Database::getInstance()->getConnection();
+        if ($this->connection === null) {
+            $this->connection = Database::getInstance()->getConnection();
+        }
+
+        return $this->connection;
     }
 
     protected function view(string $view, array $data = []): void
     {
-        extract($data, EXTR_SKIP);
-
         $viewPath = __DIR__ . '/../Views/' . str_replace('.', '/', $view) . '.php';
         if (!is_file($viewPath)) {
             throw new \RuntimeException("View {$view} não encontrada.");
         }
 
-        if (str_starts_with($view, 'layouts/') || str_starts_with($view, 'errors/')) {
-            // As views de erro atuais já são documentos HTML completos.
-            require $viewPath;
+        if (str_starts_with($view, 'layouts/') || str_starts_with($view, 'errors/') || $view === 'certificado/show') {
+            $this->includeViewFile($viewPath, $data);
             return;
         }
 
-        if ($view === 'certificado/show') {
-            // A view atual do certificado já é um documento HTML completo.
-            require $viewPath;
-            return;
-        }
+        $layout = (str_starts_with($view, 'auth/') || $view === 'certificado/validar')
+            ? 'auth'
+            : 'main';
 
-        if (str_starts_with($view, 'auth/') || $view === 'certificado/validar') {
-            $layout = 'auth';
-        } elseif (str_starts_with($view, 'admin/')) {
-            $layout = 'main';
-        } else {
-            $layout = 'main';
-        }
-
-        $contentView = $viewPath;
         $layoutPath = __DIR__ . '/../Views/layouts/' . $layout . '.php';
-
-        if (is_file($layoutPath)) {
-            require $layoutPath;
+        if (!is_file($layoutPath)) {
+            $this->includeViewFile($viewPath, $data);
             return;
         }
 
-        require $viewPath;
+        if (array_key_exists('contentView', $data)) {
+            throw new \InvalidArgumentException('A variável contentView é reservada pelo renderer.');
+        }
+
+        $data['contentView'] = $viewPath;
+        $this->includeViewFile($layoutPath, $data);
     }
 
-    protected function layout(string $layoutName): void
+    private function includeViewFile(string $__viewFileInternal, array $__viewDataInternal): void
     {
-        // Mantido apenas por compatibilidade com views antigas.
-        // A seleção real do layout é feita em view().
+        $reserved = ['__viewFileInternal', '__viewDataInternal'];
+        if (array_intersect($reserved, array_keys($__viewDataInternal)) !== []) {
+            throw new \InvalidArgumentException('A view recebeu uma variável com nome reservado.');
+        }
+
+        (function () use ($__viewFileInternal, $__viewDataInternal): void {
+            extract($__viewDataInternal, EXTR_SKIP);
+            require $__viewFileInternal;
+        })->call($this);
     }
 
     protected function redirect(string $url, int $status = 302): void
@@ -63,17 +66,7 @@ abstract class Controller
             throw new \RuntimeException('Não foi possível redirecionar: os cabeçalhos HTTP já foram enviados.');
         }
 
-        $location = $url;
-        if (str_starts_with($url, '/')) {
-            if (function_exists('url')) {
-                $location = url($url);
-            } else {
-                $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
-                $basePath = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
-                $location = (($basePath !== '' && $basePath !== '.' && $basePath !== '/') ? $basePath : '') . $url;
-            }
-        }
-
+        $location = str_starts_with($url, '/') ? Url::to($url) : $url;
         header('Location: ' . $location, true, $status);
         exit;
     }
@@ -117,81 +110,5 @@ abstract class Controller
         http_response_code(404);
         $this->view('errors/404');
         exit;
-    }
-
-    /**
-     * Define acesso ao módulo por usuário, sem alterar modules.status.
-     * O primeiro módulo é liberado; os demais dependem da aprovação
-     * do módulo imediatamente anterior.
-     */
-    protected function canAccessModule(int $userId, array $module): bool
-    {
-        $moduleNumber = (int) ($module['module_number'] ?? 0);
-        $courseId = (int) ($module['course_id'] ?? 0);
-
-        if ($courseId <= 0 || $moduleNumber <= 0) {
-            return false;
-        }
-
-        $stmt = $this->db->prepare(
-            'SELECT id
-             FROM modules
-             WHERE course_id = ? AND module_number < ?
-             ORDER BY module_number DESC, id DESC
-             LIMIT 1'
-        );
-        $stmt->execute([$courseId, $moduleNumber]);
-        $previousModuleId = $stmt->fetchColumn();
-
-        if (!$previousModuleId) {
-            return true;
-        }
-
-        return $this->hasPassedModule($userId, (int) $previousModuleId);
-    }
-
-    protected function hasPassedModule(int $userId, int $moduleId): bool
-    {
-        $stmt = $this->db->prepare(
-            'SELECT 1
-             FROM module_tests mt
-             INNER JOIN user_module_tests umt ON umt.module_test_id = mt.id
-             WHERE mt.module_id = ?
-               AND umt.user_id = ?
-               AND umt.passed = 1
-             LIMIT 1'
-        );
-        $stmt->execute([$moduleId, $userId]);
-
-        return (bool) $stmt->fetchColumn();
-    }
-
-    protected function hasCompletedAllLessons(int $userId, int $moduleId): bool
-    {
-        $stmt = $this->db->prepare(
-            "SELECT COUNT(*)
-             FROM lessons
-             WHERE module_id = ? AND status = 'published'"
-        );
-        $stmt->execute([$moduleId]);
-        $totalLessons = (int) $stmt->fetchColumn();
-
-        if ($totalLessons === 0) {
-            return false;
-        }
-
-        $stmt = $this->db->prepare(
-            "SELECT COUNT(DISTINCT l.id)
-             FROM lessons l
-             INNER JOIN user_lesson_progress ulp ON ulp.lesson_id = l.id
-             WHERE l.module_id = ?
-               AND l.status = 'published'
-               AND ulp.user_id = ?
-               AND ulp.completed = 1"
-        );
-        $stmt->execute([$moduleId, $userId]);
-        $completedLessons = (int) $stmt->fetchColumn();
-
-        return $completedLessons >= $totalLessons;
     }
 }

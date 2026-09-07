@@ -15,7 +15,7 @@ class AdminController extends Controller
             $this->redirect('/dashboard');
         }
 
-        $stats = $this->db->query(
+        $stats = $this->db()->query(
             'SELECT
                 (SELECT COUNT(*) FROM users) AS usuarios,
                 (SELECT COUNT(*) FROM courses) AS cursos,
@@ -28,7 +28,7 @@ class AdminController extends Controller
             'aulas' => 0,
         ];
 
-        $courses = $this->db
+        $courses = $this->db()
             ->query('SELECT * FROM courses ORDER BY id DESC')
             ->fetchAll();
 
