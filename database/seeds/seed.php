@@ -217,9 +217,9 @@ $modules = [
             'lesson_slug' => 'criando-composer-json',
             'title' => 'Quiz - Composer',
             'type' => 'multiple_choice',
-            'question' => 'Qual comando instala dependências?',
-            'options' => json_encode(['a' => 'composer install', 'b' => 'composer update', 'c' => 'composer require', 'd' => 'Todos os anteriores']),
-            'correct' => 'd',
+            'question' => 'Qual comando instala as dependências registradas no composer.lock?',
+            'options' => json_encode(['a' => 'composer install', 'b' => 'composer update', 'c' => 'composer init', 'd' => 'composer dump-autoload']),
+            'correct' => 'a',
             'xp' => 20
         ],
         'test' => [
@@ -392,15 +392,8 @@ foreach ($modules as $modData) {
     echo "Módulo \"{$modData['title']}\" inserido com sucesso.\n";
 }
 
-// Definir desbloqueio de módulos: o módulo 1 fica ativo, os demais permanecem
-// locked (já é o padrão de insertModule(), mas reforçamos aqui por clareza).
-$db->exec("UPDATE modules SET status = 'active' WHERE id = " . (int) $moduleIds['introducao-php-ambiente']);
-
-foreach ($moduleIds as $slug => $id) {
-    if ($slug !== 'introducao-php-ambiente') {
-        $db->prepare("UPDATE modules SET status = 'locked' WHERE id = ?")->execute([$id]);
-    }
-}
+// modules.status representa PUBLICAÇÃO do conteúdo (draft/published).
+// O desbloqueio é calculado individualmente por aluno a partir de user_module_tests.
 
     $db->commit();
     echo "Seed concluído com sucesso!\n";
@@ -425,7 +418,7 @@ function insertCourse($db, $title, $slug, $description, $status) {
 }
 
 function insertModule($db, $courseId, $title, $slug, $description, $number, $xp) {
-    $stmt = $db->prepare("INSERT INTO modules (course_id, title, slug, description, module_number, xp_reward, status) VALUES (?, ?, ?, ?, ?, ?, 'locked')");
+    $stmt = $db->prepare("INSERT INTO modules (course_id, title, slug, description, module_number, xp_reward, status) VALUES (?, ?, ?, ?, ?, ?, 'published')");
     $stmt->execute([$courseId, $title, $slug, $description, $number, $xp]);
     return $db->lastInsertId();
 }

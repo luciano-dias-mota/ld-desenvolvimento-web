@@ -1055,3 +1055,25 @@ html[data-theme="light"] .btn-success { color: #fff; }
   .certificate p,
   .certificate strong { color: #111 !important; }
 }
+
+
+/* Progresso por aluno no mapa da jornada */
+.module-progress {
+    height: 8px;
+    margin: 14px 0 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(127, 127, 127, .14);
+}
+.module-progress-bar {
+    height: 100%;
+    min-width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--success));
+    transition: width .25s ease;
+}
+
+
+/* ===== V6: visitante, Google e verificação de e-mail ===== */
+.btn-block{width:100%;justify-content:center}.auth-box-wide{max-width:520px}.google-access{display:flex;justify-content:center;margin:12px 0 4px;min-height:44px}.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted)}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}.auth-divider span{text-transform:uppercase;font-size:.72rem;letter-spacing:.16em}.guest-access-card{margin-top:22px;padding:18px;border:1px solid rgba(249,115,22,.35);border-radius:14px;background:rgba(249,115,22,.06)}.guest-access-card strong{display:block;margin-bottom:6px}.guest-access-card p{margin:0 0 14px;color:var(--muted);font-size:.92rem;line-height:1.5}.auth-link-line{text-align:center;margin-top:16px}.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.guest-banner,.verification-banner{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:14px 16px;margin:18px 0 24px;border-radius:12px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.08)}.guest-banner strong,.verification-banner strong{white-space:nowrap}.guest-banner span{flex:1;color:var(--muted)}.guest-banner a{font-weight:700}.verification-banner p{margin:4px 0 0;color:var(--muted)}.guest-inline-note{padding:12px 14px;margin:12px 0 20px;border-radius:10px;border:1px solid rgba(34,197,94,.28);background:rgba(34,197,94,.07);color:var(--text)}.home-guest-form{display:inline-flex;margin:0}@media(max-width:720px){.guest-banner,.verification-banner{align-items:flex-start;flex-direction:column}.home-guest-form{width:100%}.home-guest-form .btn{width:100%}.google-access iframe{max-width:100%!important}}
