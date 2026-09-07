@@ -10,12 +10,6 @@ abstract class Model
     protected static string $primaryKey = 'id';
     protected static array $fillable = [];
 
-    protected PDO $db;
-
-    public function __construct()
-    {
-        $this->db = Database::getInstance()->getConnection();
-    }
 
     protected static function getDB(): PDO
     {
@@ -157,19 +151,6 @@ abstract class Model
         return $stmt->execute([$id]);
     }
 
-    public function save(): bool
-    {
-        $data = get_object_vars($this);
-        unset($data['db']);
-
-        if (!isset($data['id'])) {
-            return false;
-        }
-
-        $id = (int) $data['id'];
-        unset($data['id']);
-        return static::update($id, $data);
-    }
 
     protected static function sanitizeWriteData(array $data): array
     {

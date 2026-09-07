@@ -59,6 +59,11 @@ class CertificateController extends LearningController
             $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
         }
 
+        if (!$this->canIssueCertificateFor($user)) {
+            Session::flash('error', 'Confirme seu e-mail antes de emitir o certificado.');
+            $this->redirect('/dashboard#curso-' . rawurlencode($courseSlug));
+        }
+
         Certificate::createCertificate((int) $user['id'], (int) $course['id']);
         Session::flash('success', 'Certificado emitido com sucesso.');
         $this->redirect('/certificado/' . rawurlencode($courseSlug));

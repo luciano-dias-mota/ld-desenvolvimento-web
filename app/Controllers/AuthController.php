@@ -6,6 +6,8 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Session;
 use App\Models\User;
+use App\Services\EmailVerificationService;
+use App\Services\GoogleIdentityService;
 use App\Services\LoginThrottle;
 
 class AuthController extends Controller
@@ -14,7 +16,7 @@ class AuthController extends Controller
 
     public function showLoginForm(): void
     {
-        $this->view('auth/login');
+        $this->view('auth/login', $this->authViewData());
     }
 
     public function login(): void
@@ -50,7 +52,7 @@ class AuthController extends Controller
 
     public function showRegisterForm(): void
     {
-        $this->view('auth/register');
+        $this->view('auth/register', $this->authViewData());
     }
 
     public function register(): void
@@ -63,7 +65,7 @@ class AuthController extends Controller
         $name = trim((string) ($_POST['name'] ?? ''));
         $email = strtolower(trim((string) ($_POST['email'] ?? '')));
         $password = (string) ($_POST['password'] ?? '');
-
+        $passwordConfirmation = (string) ($_POST['password_confirmation'] ?? '');
         $nameLength = function_exists('mb_strlen') ? mb_strlen($name) : strlen($name);
 
         if ($nameLength < 2 || $nameLength > 100) {
@@ -81,6 +83,11 @@ class AuthController extends Controller
             $this->redirect('/register');
         }
 
+        if (!hash_equals($password, $passwordConfirmation)) {
+            Session::flash('error', 'A confirmação da senha não confere.');
+            $this->redirect('/register');
+        }
+
         if (User::emailExists($email)) {
             Session::flash('error', 'Não foi possível criar a conta com os dados informados.');
             $this->redirect('/register');
@@ -91,6 +98,8 @@ class AuthController extends Controller
                 'name' => $name,
                 'email' => $email,
                 'password' => password_hash($password, PASSWORD_DEFAULT),
+                'google_sub' => null,
+                'email_verified_at' => null,
                 'role' => 'student',
                 'xp' => 0,
             ]);
@@ -105,7 +114,101 @@ class AuthController extends Controller
             $this->redirect('/login');
         }
 
-        Session::flash('success', 'Conta criada com sucesso.');
+        $verification = new EmailVerificationService($this->db());
+        if ($verification->isEnabled()) {
+            try {
+                $user = User::findPublicById($userId);
+                if ($user && $verification->sendForUser($user)) {
+                    Session::flash('success', 'Conta criada! Enviamos um link para confirmar seu e-mail.');
+                } else {
+                    Session::flash('success', 'Conta criada com sucesso.');
+                }
+            } catch (\Throwable $e) {
+                error_log('Falha ao iniciar verificação de e-mail: ' . $e->getMessage());
+                Session::flash('success', 'Conta criada com sucesso.');
+            }
+        } else {
+            Session::flash('success', 'Conta criada com sucesso.');
+        }
+
+        $this->redirect('/dashboard');
+    }
+
+    public function enterGuest(): void
+    {
+        if (!$this->validateCsrf()) {
+            Session::flash('error', 'Sessão expirada. Recarregue a página e tente novamente.');
+            $this->redirect('/register');
+        }
+
+        Auth::enterGuestMode();
+        Session::flash('success', 'Modo visitante ativado. Você pode explorar o curso, mas o progresso não será salvo e não haverá certificado.');
+        $this->redirect('/dashboard');
+    }
+
+    public function exitGuest(): void
+    {
+        if (!$this->validateCsrf()) {
+            $this->redirect('/dashboard');
+        }
+
+        Auth::exitGuestMode();
+        Session::flash('success', 'Modo visitante encerrado. Crie uma conta para salvar seu progresso.');
+        $this->redirect('/register');
+    }
+
+    public function verifyEmail(string $token): void
+    {
+        try {
+            $user = (new EmailVerificationService($this->db()))->verifyToken($token);
+        } catch (\Throwable $e) {
+            error_log('Erro ao verificar e-mail: ' . $e->getMessage());
+            $user = null;
+        }
+
+        if (!$user) {
+            Session::flash('error', 'Link de confirmação inválido, expirado ou já utilizado.');
+            $this->redirect(Auth::check() ? '/dashboard' : '/login');
+        }
+
+        Session::flash('success', 'E-mail confirmado com sucesso.');
+        $this->redirect(Auth::check() ? '/dashboard' : '/login');
+    }
+
+    public function resendVerification(): void
+    {
+        if (!$this->validateCsrf()) {
+            Session::flash('error', 'Sessão expirada. Recarregue a página e tente novamente.');
+            $this->redirect('/dashboard');
+        }
+
+        $user = Auth::user();
+        if (!$user) {
+            $this->redirect('/login');
+        }
+
+        if (!empty($user['email_verified_at'])) {
+            Session::flash('success', 'Seu e-mail já está confirmado.');
+            $this->redirect('/dashboard');
+        }
+
+        $service = new EmailVerificationService($this->db());
+        if (!$service->isEnabled()) {
+            Session::flash('error', 'O envio de confirmação por e-mail ainda não está habilitado.');
+            $this->redirect('/dashboard');
+        }
+
+        try {
+            if ($service->sendForUser($user)) {
+                Session::flash('success', 'Novo link de confirmação enviado.');
+            } else {
+                Session::flash('error', 'Não foi possível enviar o e-mail de confirmação.');
+            }
+        } catch (\Throwable $e) {
+            error_log('Falha ao reenviar verificação: ' . $e->getMessage());
+            Session::flash('error', 'Não foi possível enviar o e-mail de confirmação.');
+        }
+
         $this->redirect('/dashboard');
     }
 
@@ -118,6 +221,15 @@ class AuthController extends Controller
 
         Auth::logout();
         $this->redirect('/login');
+    }
+
+    private function authViewData(): array
+    {
+        $google = new GoogleIdentityService();
+        return [
+            'googleEnabled' => $google->isEnabled(),
+            'googleClientId' => $google->clientId(),
+        ];
     }
 
     private function throttle(): LoginThrottle

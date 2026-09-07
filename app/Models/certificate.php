@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Core\Database;
 use App\Core\Model;
 use PDO;
+use PDOException;
 
 class Certificate extends Model
 {
@@ -26,7 +27,7 @@ class Certificate extends Model
     {
         $db = Database::getInstance()->getConnection();
         $stmt = $db->prepare(
-            'SELECT *
+            'SELECT id, user_id, course_id, certificate_code, issued_at
              FROM certificates
              WHERE user_id = ? AND course_id = ?
              ORDER BY id ASC
@@ -38,54 +39,45 @@ class Certificate extends Model
     }
 
     /**
-     * Criação idempotente: para o mesmo usuário/curso, retorna o certificado
-     * já existente em vez de criar outro. A constraint UNIQUE no schema ainda
-     * é recomendada como proteção definitiva no banco.
+     * Idempotência garantida pela UNIQUE(user_id, course_id) do banco.
+     * Em corrida concorrente, uma requisição insere e a outra reutiliza o registro.
      */
     public static function createCertificate(int $userId, int $courseId): int
     {
         $db = Database::getInstance()->getConnection();
-        $ownsTransaction = !$db->inTransaction();
 
-        if ($ownsTransaction) {
-            $db->beginTransaction();
+        $existing = self::getUserCertificate($userId, $courseId);
+        if ($existing) {
+            return (int) $existing['id'];
         }
 
-        try {
-            // Serializa emissões concorrentes do mesmo usuário.
-            $stmt = $db->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
-            $stmt->execute([$userId]);
-            if (!$stmt->fetchColumn()) {
-                throw new \RuntimeException('Usuário não encontrado para emissão do certificado.');
-            }
-
-            $existing = self::getUserCertificate($userId, $courseId);
-            if ($existing) {
-                if ($ownsTransaction) {
-                    $db->commit();
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            try {
+                $stmt = $db->prepare(
+                    'INSERT INTO certificates
+                        (user_id, course_id, certificate_code, issued_at)
+                     VALUES (?, ?, ?, NOW())'
+                );
+                $stmt->execute([$userId, $courseId, self::generateCode()]);
+                return (int) $db->lastInsertId();
+            } catch (PDOException $e) {
+                if ($e->getCode() !== '23000') {
+                    throw $e;
                 }
-                return (int) $existing['id'];
-            }
 
-            $code = self::generateCode();
-            $stmt = $db->prepare(
-                'INSERT INTO certificates
-                    (user_id, course_id, certificate_code, issued_at)
-                 VALUES (?, ?, ?, NOW())'
-            );
-            $stmt->execute([$userId, $courseId, $code]);
-            $id = (int) $db->lastInsertId();
+                // Se foi corrida no UNIQUE(user_id, course_id), reaproveita o existente.
+                $existing = self::getUserCertificate($userId, $courseId);
+                if ($existing) {
+                    return (int) $existing['id'];
+                }
 
-            if ($ownsTransaction) {
-                $db->commit();
+                // Caso raríssimo de colisão de certificate_code: tenta um novo código.
+                if ($attempt === 3) {
+                    throw $e;
+                }
             }
-
-            return $id;
-        } catch (\Throwable $e) {
-            if ($ownsTransaction && $db->inTransaction()) {
-                $db->rollBack();
-            }
-            throw $e;
         }
+
+        throw new \RuntimeException('Não foi possível emitir o certificado.');
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página não encontrada · PHP Quest</title>
+    <title>Página não encontrada · LD Desenvolvimento Web</title>
 
     <script>
         (function () {

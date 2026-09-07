@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificado · PHP Quest</title>
+    <title>Certificado · LD Desenvolvimento Web</title>
 
     <script>
         (function () {
@@ -25,7 +25,7 @@
             <div class="actions-row" style="justify-content:space-between;">
                 <a href="<?= url('/dashboard') ?>" class="logo">
                     <span class="logo-mark">&lt;/&gt;</span>
-                    <span class="logo-word"><strong>PHP</strong> Quest</span>
+                    <span class="logo-word"><strong>LD</strong> Desenvolvimento Web</span>
                 </a>
 
                 <button type="button" class="theme-toggle" data-theme-toggle aria-label="Alternar tema">
@@ -40,7 +40,7 @@
             <h1 style="margin:18px 0;">Curso de <?= e($course['title']) ?></h1>
             <p style="font-size:1.15rem; margin-inline:auto;">
                 Certificamos que <strong><?= e($user['name']) ?></strong> concluiu com sucesso
-                todas as fases e provas do curso de <?= e($course['title']) ?> na PHP Quest.
+                todas as fases e provas do curso de <?= e($course['title']) ?> na plataforma LD Desenvolvimento Web.
             </p>
             <p class="code">
                 Código de validação: <?= e($certificate['certificate_code']) ?><br>

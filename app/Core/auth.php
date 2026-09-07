@@ -17,26 +17,23 @@ class Auth
         $user = User::findForAuthByEmail($email);
 
         if (!$user) {
-            // Mantém custo semelhante ao caso de e-mail existente para reduzir
-            // enumeração de contas por diferença de tempo de resposta.
             password_verify($password, self::DUMMY_PASSWORD_HASH);
             return false;
         }
 
-        if (!password_verify($password, (string) $user['password'])) {
+        $hash = $user['password'] ?? null;
+        if (!is_string($hash) || $hash === '') {
+            password_verify($password, self::DUMMY_PASSWORD_HASH);
             return false;
         }
 
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_regenerate_id(true);
+        if (!password_verify($password, $hash)) {
+            return false;
         }
 
-        Session::set('user_id', (int) $user['id']);
-        Session::set('csrf_token', bin2hex(random_bytes(32)));
-        Session::set('_session_started_at', time());
-        Session::set('_session_last_activity', time());
+        self::loginUser((int) $user['id']);
 
-        if (password_needs_rehash((string) $user['password'], PASSWORD_DEFAULT)) {
+        if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
             try {
                 User::update((int) $user['id'], [
                     'password' => password_hash($password, PASSWORD_DEFAULT),
@@ -46,11 +43,63 @@ class Auth
             }
         }
 
+        return true;
+    }
+
+    public static function loginUser(int $userId): bool
+    {
+        if ($userId <= 0 || !User::findPublicById($userId)) {
+            return false;
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+
+        Session::remove('guest_mode');
+        Session::set('user_id', $userId);
+        Session::set('csrf_token', bin2hex(random_bytes(32)));
+        Session::set('_session_started_at', time());
+        Session::set('_session_last_activity', time());
+
         self::$resolved = false;
         self::$cachedUser = null;
         self::user();
 
         return true;
+    }
+
+    public static function enterGuestMode(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+
+        Session::remove('user_id');
+        Session::set('guest_mode', true);
+        Session::set('csrf_token', bin2hex(random_bytes(32)));
+        Session::set('_session_started_at', time());
+        Session::set('_session_last_activity', time());
+
+        self::$cachedUser = null;
+        self::$resolved = true;
+    }
+
+    public static function exitGuestMode(): void
+    {
+        Session::remove('guest_mode');
+        self::$cachedUser = null;
+        self::$resolved = false;
+    }
+
+    public static function isGuest(): bool
+    {
+        return !self::check() && Session::get('guest_mode') === true;
+    }
+
+    public static function hasLearningAccess(): bool
+    {
+        return self::check() || self::isGuest();
     }
 
     public static function user(): ?array

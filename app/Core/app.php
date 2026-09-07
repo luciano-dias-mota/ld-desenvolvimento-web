@@ -19,7 +19,8 @@ class App
             $router
                 ->registerMiddleware('auth', \App\Middleware\AuthMiddleware::class)
                 ->registerMiddleware('admin', \App\Middleware\AdminMiddleware::class)
-                ->registerMiddleware('guest', \App\Middleware\GuestMiddleware::class);
+                ->registerMiddleware('guest', \App\Middleware\GuestMiddleware::class)
+                ->registerMiddleware('learning', \App\Middleware\LearningMiddleware::class);
 
             require __DIR__ . '/../../routes/web.php';
             require __DIR__ . '/../../routes/admin.php';
@@ -48,9 +49,10 @@ class App
 
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
+        header('Cross-Origin-Opener-Policy: same-origin-allow-popups');
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
-        header("Content-Security-Policy: default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; connect-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; frame-src https://www.youtube-nocookie.com https://player.vimeo.com");
+        header("Content-Security-Policy: default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: https://lh3.googleusercontent.com; connect-src 'self' https://accounts.google.com/gsi/; script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' https://fonts.gstatic.com data:; frame-src https://accounts.google.com/gsi/ https://www.youtube-nocookie.com https://player.vimeo.com");
 
         $isProduction = strtolower((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production')) === 'production';
         $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')

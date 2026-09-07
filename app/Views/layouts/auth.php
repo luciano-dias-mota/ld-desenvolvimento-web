@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#07090c">
-    <title><?= e($title ?? 'PHP Quest') ?></title>
+    <title><?= e($title ?? ($_ENV['APP_NAME'] ?? 'LD Desenvolvimento Web')) ?></title>
 
     <script>
         (function () {
@@ -23,9 +23,9 @@
 <body>
     <div class="auth-page">
         <div class="auth-topbar">
-            <a href="<?= url('/') ?>" class="logo" aria-label="PHP Quest - início">
+            <a href="<?= url('/') ?>" class="logo" aria-label="LD Desenvolvimento Web - início">
                 <span class="logo-mark">&lt;/&gt;</span>
-                <span class="logo-word"><strong>PHP</strong> Quest</span>
+                <span class="logo-word"><strong>LD</strong> Desenvolvimento Web</span>
             </a>
 
             <button type="button" class="theme-toggle" data-theme-toggle aria-label="Alternar tema">
@@ -66,5 +66,9 @@
     </div>
 
     <script src="<?= asset('js/theme.js') ?>"></script>
+    <?php if (!empty($googleEnabled)): ?>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <script src="<?= asset('js/google-login.js') ?>" defer></script>
+    <?php endif; ?>
 </body>
 </html>
