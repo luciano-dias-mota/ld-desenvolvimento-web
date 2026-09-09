@@ -1,6 +1,6 @@
 <?php
 
-use App\Core\Session;
+use App\Core\Csrf;
 use App\Core\Url;
 
 if (!function_exists('url')) {
@@ -27,31 +27,14 @@ if (!function_exists('e')) {
 if (!function_exists('csrf_field')) {
     function csrf_field(): string
     {
-        Session::start();
-
-        $token = Session::get('csrf_token');
-        if (!is_string($token) || $token === '') {
-            $token = bin2hex(random_bytes(32));
-            Session::set('csrf_token', $token);
-        }
-
-        return '<input type="hidden" name="csrf_token" value="' . e($token) . '">';
+        return Csrf::field();
     }
 }
 
 if (!function_exists('verify_csrf')) {
     function verify_csrf(): bool
     {
-        Session::start();
-
-        $token = $_POST['csrf_token'] ?? null;
-        $sessionToken = Session::get('csrf_token');
-
-        if (!is_string($token) || !is_string($sessionToken) || $token === '' || $sessionToken === '') {
-            return false;
-        }
-
-        return hash_equals($sessionToken, $token);
+        return Csrf::validate($_POST['csrf_token'] ?? null);
     }
 }
 

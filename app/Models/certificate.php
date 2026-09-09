@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Core\Database;
 use App\Core\Model;
 use PDO;
 use PDOException;
@@ -25,7 +24,7 @@ class Certificate extends Model
 
     public static function getUserCertificate(int $userId, int $courseId): ?array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
         $stmt = $db->prepare(
             'SELECT id, user_id, course_id, certificate_code, issued_at
              FROM certificates
@@ -44,7 +43,7 @@ class Certificate extends Model
      */
     public static function createCertificate(int $userId, int $courseId): int
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
 
         $existing = self::getUserCertificate($userId, $courseId);
         if ($existing) {

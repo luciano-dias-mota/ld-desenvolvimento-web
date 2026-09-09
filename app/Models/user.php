@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Core\Database;
 use App\Core\Model;
 use PDO;
 
@@ -22,7 +21,7 @@ class User extends Model
 
     public static function findForAuthByEmail(string $email): ?array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
         $stmt = $db->prepare(
             'SELECT id, name, email, password, google_sub, email_verified_at, role, xp, created_at, updated_at
              FROM users
@@ -35,7 +34,7 @@ class User extends Model
 
     public static function findByGoogleSub(string $googleSub): ?array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
         $stmt = $db->prepare(
             'SELECT id, name, email, password, google_sub, email_verified_at, role, xp, created_at, updated_at
              FROM users
@@ -48,7 +47,7 @@ class User extends Model
 
     public static function findPublicById(int $id): ?array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
         $stmt = $db->prepare(
             'SELECT id, name, email, email_verified_at, role, xp, created_at, updated_at
              FROM users
@@ -61,7 +60,7 @@ class User extends Model
 
     public static function emailExists(string $email): bool
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
         $stmt = $db->prepare('SELECT 1 FROM users WHERE email = ? LIMIT 1');
         $stmt->execute([strtolower(trim($email))]);
         return (bool) $stmt->fetchColumn();
@@ -69,7 +68,7 @@ class User extends Model
 
     public static function linkGoogleIdentity(int $userId, string $googleSub, bool $markEmailVerified): bool
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
         $sql = 'UPDATE users SET google_sub = ?';
         $params = [$googleSub];
 
@@ -86,7 +85,7 @@ class User extends Model
 
     public static function markEmailVerified(int $userId): bool
     {
-        $db = Database::getInstance()->getConnection();
+        $db = static::getDB();
         $stmt = $db->prepare('UPDATE users SET email_verified_at = COALESCE(email_verified_at, NOW()) WHERE id = ?');
         return $stmt->execute([$userId]);
     }

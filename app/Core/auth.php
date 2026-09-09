@@ -7,6 +7,7 @@ use App\Models\User;
 class Auth
 {
     private const DUMMY_PASSWORD_HASH = '$2y$10$90sDne/xrqAJX5Cf4D.et.yBngoRy6lWAqZxEfxbibzwysG8qLswe';
+    private const GUEST_PROGRESS_KEY = 'guest_learning_progress';
 
     private static ?array $cachedUser = null;
     private static bool $resolved = false;
@@ -22,6 +23,7 @@ class Auth
         }
 
         $hash = $user['password'] ?? null;
+
         if (!is_string($hash) || $hash === '') {
             password_verify($password, self::DUMMY_PASSWORD_HASH);
             return false;
@@ -39,7 +41,12 @@ class Auth
                     'password' => password_hash($password, PASSWORD_DEFAULT),
                 ]);
             } catch (\Throwable $e) {
-                error_log('Falha ao rehash da senha do usuário ' . (int) $user['id'] . ': ' . $e->getMessage());
+                error_log(
+                    'Falha ao rehash da senha do usuário '
+                    . (int) $user['id']
+                    . ': '
+                    . $e->getMessage()
+                );
             }
         }
 
@@ -57,6 +64,7 @@ class Auth
         }
 
         Session::remove('guest_mode');
+        Session::remove(self::GUEST_PROGRESS_KEY);
         Session::set('user_id', $userId);
         Session::set('csrf_token', bin2hex(random_bytes(32)));
         Session::set('_session_started_at', time());
@@ -77,6 +85,10 @@ class Auth
 
         Session::remove('user_id');
         Session::set('guest_mode', true);
+        Session::set(self::GUEST_PROGRESS_KEY, [
+            'lessons' => [],
+            'modules' => [],
+        ]);
         Session::set('csrf_token', bin2hex(random_bytes(32)));
         Session::set('_session_started_at', time());
         Session::set('_session_last_activity', time());
@@ -88,6 +100,8 @@ class Auth
     public static function exitGuestMode(): void
     {
         Session::remove('guest_mode');
+        Session::remove(self::GUEST_PROGRESS_KEY);
+
         self::$cachedUser = null;
         self::$resolved = false;
     }
@@ -110,12 +124,14 @@ class Auth
 
         self::$resolved = true;
         $userId = Session::get('user_id');
+
         if (!$userId) {
             self::$cachedUser = null;
             return null;
         }
 
         $user = User::findPublicById((int) $userId);
+
         if (!$user) {
             Session::remove('user_id');
             self::$cachedUser = null;
@@ -123,6 +139,7 @@ class Auth
         }
 
         self::$cachedUser = $user;
+
         return self::$cachedUser;
     }
 
@@ -134,6 +151,7 @@ class Auth
     public static function isAdmin(): bool
     {
         $user = self::user();
+
         return $user !== null && ($user['role'] ?? null) === 'admin';
     }
 

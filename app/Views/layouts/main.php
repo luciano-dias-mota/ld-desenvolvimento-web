@@ -26,7 +26,7 @@
 </div></header>
 <main class="container">
     <?php if (\App\Core\Auth::isGuest()): ?>
-        <div class="guest-banner"><strong>👾 Modo visitante</strong><span>Você pode estudar e testar seus conhecimentos, mas progresso, XP e certificado não são gravados.</span><a href="<?= url('/register') ?>">Criar conta gratuita</a></div>
+        <div class="guest-banner"><strong>👾 Modo visitante</strong><span>Você avança normalmente durante esta sessão, mas o progresso não é salvo na conta; XP e certificado também não são gerados.</span><a href="<?= url('/register') ?>">Criar conta gratuita</a></div>
     <?php endif; ?>
     <?php if ($flash=\App\Core\Session::flash('success')): ?><div class="alert alert-success"><?= e($flash) ?></div><?php endif; ?>
     <?php if ($flash=\App\Core\Session::flash('error')): ?><div class="alert alert-error"><?= e($flash) ?></div><?php endif; ?>

@@ -81,28 +81,12 @@ abstract class Controller
 
     protected function csrfField(): string
     {
-        $token = Session::get('csrf_token');
-
-        if (!is_string($token) || $token === '') {
-            $token = bin2hex(random_bytes(32));
-            Session::set('csrf_token', $token);
-        }
-
-        return '<input type="hidden" name="csrf_token" value="'
-            . htmlspecialchars($token, ENT_QUOTES, 'UTF-8')
-            . '">';
+        return Csrf::field();
     }
 
     protected function validateCsrf(): bool
     {
-        $token = $_POST['csrf_token'] ?? '';
-        $sessionToken = Session::get('csrf_token');
-
-        if (!is_string($token) || !is_string($sessionToken) || $token === '' || $sessionToken === '') {
-            return false;
-        }
-
-        return hash_equals($sessionToken, $token);
+        return Csrf::validate($_POST['csrf_token'] ?? null);
     }
 
     protected function notFound(): void

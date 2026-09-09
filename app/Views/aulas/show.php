@@ -1,10 +1,101 @@
-<div class="breadcrumb"><a href="<?= url('/dashboard#curso-'.rawurlencode($course['slug'])) ?>">Mapa da Jornada</a><span>/</span><a href="<?= url('/cursos/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug'])) ?>"><?= e($module['title']) ?></a></div>
-<div class="page-heading"><span class="page-kicker">Lesson Mode</span><h1><?= e($lesson['title']) ?></h1><?php if($completed):?><span class="badge-check">✓ Aula concluída</span><?php elseif(!empty($isGuest)):?><span class="badge">👾 progresso não salvo</span><?php endif;?></div>
-<?php $embedUrl=video_embed_url($lesson['video_url']??null);if($embedUrl):?><div class="lesson-content lesson-video"><div class="lesson-video-frame"><iframe src="<?= e($embedUrl) ?>" title="Vídeo da aula <?= e($lesson['title']) ?>" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div></div><?php endif;?>
-<div class="lesson-content"><?= safe_lesson_html($lesson['content']??'') ?></div>
+<div class="breadcrumb">
+    <a href="<?= url('/dashboard#curso-' . rawurlencode($course['slug'])) ?>">Mapa da Jornada</a>
+    <span>/</span>
+    <a href="<?= url('/cursos/' . rawurlencode($course['slug']) . '/' . rawurlencode($module['slug'])) ?>">
+        <?= e($module['title']) ?>
+    </a>
+</div>
+
+<div class="page-heading">
+    <span class="page-kicker">Lesson Mode</span>
+    <h1><?= e($lesson['title']) ?></h1>
+
+    <?php if ($completed): ?>
+        <span class="badge-check">✓ Aula concluída</span>
+    <?php elseif (!empty($isGuest)): ?>
+        <span class="badge">👾 progresso temporário nesta sessão</span>
+    <?php endif; ?>
+</div>
+
+<?php
+$embedUrl = video_embed_url($lesson['video_url'] ?? null);
+if ($embedUrl):
+?>
+    <div class="lesson-content lesson-video">
+        <div class="lesson-video-frame">
+            <iframe
+                src="<?= e($embedUrl) ?>"
+                title="Vídeo da aula <?= e($lesson['title']) ?>"
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+            ></iframe>
+        </div>
+    </div>
+<?php endif; ?>
+
+<div class="lesson-content">
+    <?= safe_lesson_html($lesson['content'] ?? '') ?>
+</div>
+
 <div class="lesson-actions">
-<?php if($exercise):?><a href="<?= url('/exercicios/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug']).'/'.rawurlencode($lesson['slug'])) ?>" class="btn btn-primary"><?= !empty($isGuest)?'Fazer exercício':($completed?'Rever exercício':'Ir para o exercício de fixação') ?></a>
-<?php elseif(!$completed&&!empty($isGuest)):?><span class="text-muted">Aula disponível para leitura; o modo visitante não marca conclusão.</span>
-<?php elseif(!$completed):?><form action="<?= url('/aulas/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug']).'/'.rawurlencode($lesson['slug']).'/concluir') ?>" method="POST"><?= csrf_field() ?><button type="submit" class="btn btn-primary">Marcar aula como concluída</button></form><?php endif;?>
-<?php if($next):?><a href="<?= url('/aulas/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug']).'/'.rawurlencode($next['slug'])) ?>" class="btn btn-outline">Próxima aula →</a><?php endif;?>
+    <?php if ($exercise): ?>
+        <a
+            href="<?= url(
+                '/exercicios/'
+                . rawurlencode($course['slug'])
+                . '/'
+                . rawurlencode($module['slug'])
+                . '/'
+                . rawurlencode($lesson['slug'])
+            ) ?>"
+            class="btn btn-primary"
+        >
+            <?= $completed ? 'Rever exercício' : 'Ir para o exercício de fixação' ?>
+        </a>
+    <?php elseif (!$completed): ?>
+        <form
+            action="<?= url(
+                '/aulas/'
+                . rawurlencode($course['slug'])
+                . '/'
+                . rawurlencode($module['slug'])
+                . '/'
+                . rawurlencode($lesson['slug'])
+                . '/concluir'
+            ) ?>"
+            method="POST"
+        >
+            <?= csrf_field() ?>
+            <button type="submit" class="btn btn-primary">Concluir aula</button>
+        </form>
+    <?php endif; ?>
+
+    <?php if ($completed && $next): ?>
+        <a
+            href="<?= url(
+                '/aulas/'
+                . rawurlencode($course['slug'])
+                . '/'
+                . rawurlencode($module['slug'])
+                . '/'
+                . rawurlencode($next['slug'])
+            ) ?>"
+            class="btn btn-success"
+        >
+            Próxima aula →
+        </a>
+    <?php elseif (!$completed && $next): ?>
+        <span class="text-muted">
+            🔒 A próxima aula será liberada quando você acertar o exercício desta aula.
+        </span>
+    <?php elseif ($completed): ?>
+        <a
+            href="<?= url('/cursos/' . rawurlencode($course['slug']) . '/' . rawurlencode($module['slug'])) ?>"
+            class="btn btn-outline"
+        >
+            Voltar ao módulo
+        </a>
+    <?php endif; ?>
 </div>

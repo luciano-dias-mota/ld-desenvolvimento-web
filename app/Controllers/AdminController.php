@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Session;
+use App\Repositories\AdminRepository;
 
 class AdminController extends Controller
 {
@@ -15,22 +16,9 @@ class AdminController extends Controller
             $this->redirect('/dashboard');
         }
 
-        $stats = $this->db()->query(
-            'SELECT
-                (SELECT COUNT(*) FROM users) AS usuarios,
-                (SELECT COUNT(*) FROM courses) AS cursos,
-                (SELECT COUNT(*) FROM modules) AS modulos,
-                (SELECT COUNT(*) FROM lessons) AS aulas'
-        )->fetch() ?: [
-            'usuarios' => 0,
-            'cursos' => 0,
-            'modulos' => 0,
-            'aulas' => 0,
-        ];
-
-        $courses = $this->db()
-            ->query('SELECT * FROM courses ORDER BY id DESC')
-            ->fetchAll();
+        $repository = new AdminRepository($this->db());
+        $stats = $repository->dashboardStats();
+        $courses = $repository->coursesNewestFirst();
 
         $this->view('admin/dashboard', compact('stats', 'courses'));
     }

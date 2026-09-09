@@ -7,6 +7,7 @@ use App\Core\Session;
 use App\Models\Certificate;
 use App\Models\Course;
 use App\Models\User;
+use App\Repositories\CertificateRepository;
 
 class CertificateController extends LearningController
 {
@@ -77,14 +78,8 @@ class CertificateController extends LearningController
             return;
         }
 
-        $stmt = $this->db()->prepare(
-            'SELECT id, user_id, course_id, certificate_code, issued_at
-             FROM certificates
-             WHERE certificate_code = ?
-             LIMIT 1'
-        );
-        $stmt->execute([$code]);
-        $certificate = $stmt->fetch();
+        $repository = new CertificateRepository($this->db());
+        $certificate = $repository->findByCode($code);
 
         if (!$certificate) {
             $this->view('certificado/validar', ['certificate' => null]);

@@ -1,4 +1,157 @@
-<div class="breadcrumb"><a href="<?= url('/dashboard') ?>">Mapa da Jornada</a><span>/</span><a href="<?= url('/cursos/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug'])) ?>"><?= e($module['title']) ?></a></div>
-<div class="page-heading"><span class="page-kicker">Boss Challenge</span><h1><?= e($test['title']) ?></h1><p>Fase: <?= e($module['title']) ?> — você precisa de <strong><?= (int)$test['passing_score'] ?>%</strong> de acertos.</p><?php if(!empty($isGuest)):?><div class="guest-inline-note">👾 Esta prova é uma simulação: nota, tentativa, XP e aprovação não serão gravados.</div><?php elseif(!empty($test['max_attempts'])):?><p class="text-muted">Tentativas: <?= (int)($attemptCount??0) ?>/<?= (int)$test['max_attempts'] ?></p><?php endif;?></div>
-<?php if(!empty($resultado)):?><div class="result-banner <?= $passed?'':'is-wrong' ?>"><?= $passed?'✓ Você fez '.e(number_format((float)$score,2,',','.')).'%!'.(!empty($isGuest)?' Resultado não salvo.':' Próxima fase liberada.'):'✗ Você fez '.e(number_format((float)$score,2,',','.')).'%. Precisa de '.(int)$test['passing_score'].'% para passar.'.(!empty($isGuest)?' Nada foi gravado.':'') ?></div><div class="actions-row" style="margin-bottom:40px;"><?php if(!empty($isGuest)):?><a href="<?= url('/cursos/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug']).'/prova') ?>" class="btn btn-primary">Tentar novamente</a><a href="<?= url('/register') ?>" class="btn btn-success">Criar conta e salvar progresso</a><?php elseif($passed):?><a href="<?= url('/dashboard') ?>" class="btn btn-success">Voltar ao mapa</a><?php elseif(!empty($canRetry)):?><a href="<?= url('/cursos/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug']).'/prova') ?>" class="btn btn-primary">Tentar novamente</a><?php else:?><span class="alert alert-error">Limite de tentativas atingido.</span><a href="<?= url('/cursos/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug'])) ?>" class="btn btn-outline">Voltar ao módulo</a><?php endif;?></div>
-<?php else:?><form action="<?= url('/cursos/'.rawurlencode($course['slug']).'/'.rawurlencode($module['slug']).'/prova') ?>" method="POST"><?= csrf_field() ?><?php foreach($questions as $i=>$q):?><div class="panel question-card"><h3><span class="question-number"><?= $i+1 ?>.</span> <?= e($q['question']) ?></h3><?php if(in_array($q['question_type'],['multiple_choice','true_false'],true)):$options=json_decode((string)($q['options']??''),true);?><?php if(!is_array($options)||$options===[]):?><div class="alert alert-error">Questão sem opções válidas.</div><?php else:?><?php foreach($options as $letra=>$texto):?><label class="quiz-option"><input type="radio" name="respostas[<?= (int)$q['id'] ?>]" value="<?= e((string)$letra) ?>" required><span><strong><?= e(strtoupper((string)$letra)) ?>)</strong> <?= e((string)$texto) ?></span></label><?php endforeach;?><?php endif;?><?php else:?><div class="field"><label for="resposta-<?= (int)$q['id'] ?>">Sua resposta</label><textarea id="resposta-<?= (int)$q['id'] ?>" name="respostas[<?= (int)$q['id'] ?>]" rows="5" maxlength="500" class="code-input" required></textarea></div><?php endif;?></div><?php endforeach;?><button type="submit" class="btn btn-success" style="margin-bottom:60px;">Finalizar prova<?= !empty($isGuest)?' sem salvar':'' ?></button></form><?php endif;?>
+<div class="breadcrumb">
+    <a href="<?= url('/dashboard') ?>">Mapa da Jornada</a>
+    <span>/</span>
+    <a href="<?= url('/cursos/' . rawurlencode($course['slug']) . '/' . rawurlencode($module['slug'])) ?>">
+        <?= e($module['title']) ?>
+    </a>
+</div>
+
+<div class="page-heading">
+    <span class="page-kicker">Boss Challenge</span>
+    <h1><?= e($test['title']) ?></h1>
+    <p>
+        Fase: <?= e($module['title']) ?> —
+        você precisa de <strong><?= (int) $test['passing_score'] ?>%</strong> de acertos.
+    </p>
+
+    <?php if (!empty($isGuest)): ?>
+        <div class="guest-inline-note">
+            👾 A aprovação pode liberar a próxima fase durante esta sessão,
+            mas nota, XP, certificado e progresso permanente não serão gravados.
+        </div>
+    <?php elseif (!empty($test['max_attempts'])): ?>
+        <p class="text-muted">
+            Tentativas: <?= (int) ($attemptCount ?? 0) ?>/<?= (int) $test['max_attempts'] ?>
+        </p>
+    <?php endif; ?>
+</div>
+
+<?php if (!empty($resultado)): ?>
+    <div class="result-banner <?= $passed ? '' : 'is-wrong' ?>">
+        <?php if ($passed): ?>
+            ✓ Você fez <?= e(number_format((float) $score, 2, ',', '.')) ?>%!
+            <?= !empty($isGuest)
+                ? ' Próxima fase liberada nesta sessão de visitante.'
+                : ' Próxima fase liberada.' ?>
+        <?php else: ?>
+            ✗ Você fez <?= e(number_format((float) $score, 2, ',', '.')) ?>%.
+            Precisa de <?= (int) $test['passing_score'] ?>% para passar.
+        <?php endif; ?>
+    </div>
+
+    <div class="actions-row" style="margin-bottom:40px;">
+        <?php if (!empty($isGuest)): ?>
+            <?php if ($passed): ?>
+                <a href="<?= url('/dashboard#curso-' . rawurlencode($course['slug'])) ?>" class="btn btn-success">
+                    Ir para a próxima fase
+                </a>
+            <?php endif; ?>
+
+            <a
+                href="<?= url(
+                    '/cursos/'
+                    . rawurlencode($course['slug'])
+                    . '/'
+                    . rawurlencode($module['slug'])
+                    . '/prova'
+                ) ?>"
+                class="btn btn-primary"
+            >
+                Tentar novamente
+            </a>
+
+            <a href="<?= url('/register') ?>" class="btn btn-outline">
+                Criar conta para salvar progresso
+            </a>
+        <?php elseif ($passed): ?>
+            <a href="<?= url('/dashboard') ?>" class="btn btn-success">Voltar ao mapa</a>
+        <?php elseif (!empty($canRetry)): ?>
+            <a
+                href="<?= url(
+                    '/cursos/'
+                    . rawurlencode($course['slug'])
+                    . '/'
+                    . rawurlencode($module['slug'])
+                    . '/prova'
+                ) ?>"
+                class="btn btn-primary"
+            >
+                Tentar novamente
+            </a>
+        <?php else: ?>
+            <span class="alert alert-error">Limite de tentativas atingido.</span>
+            <a
+                href="<?= url(
+                    '/cursos/'
+                    . rawurlencode($course['slug'])
+                    . '/'
+                    . rawurlencode($module['slug'])
+                ) ?>"
+                class="btn btn-outline"
+            >
+                Voltar ao módulo
+            </a>
+        <?php endif; ?>
+    </div>
+<?php else: ?>
+    <form
+        action="<?= url(
+            '/cursos/'
+            . rawurlencode($course['slug'])
+            . '/'
+            . rawurlencode($module['slug'])
+            . '/prova'
+        ) ?>"
+        method="POST"
+    >
+        <?= csrf_field() ?>
+
+        <?php foreach ($questions as $i => $q): ?>
+            <div class="panel question-card">
+                <h3>
+                    <span class="question-number"><?= $i + 1 ?>.</span>
+                    <?= e($q['question']) ?>
+                </h3>
+
+                <?php if (in_array($q['question_type'], ['multiple_choice', 'true_false'], true)): ?>
+                    <?php $options = json_decode((string) ($q['options'] ?? ''), true); ?>
+
+                    <?php if (!is_array($options) || $options === []): ?>
+                        <div class="alert alert-error">Questão sem opções válidas.</div>
+                    <?php else: ?>
+                        <?php foreach ($options as $letra => $texto): ?>
+                            <label class="quiz-option">
+                                <input
+                                    type="radio"
+                                    name="respostas[<?= (int) $q['id'] ?>]"
+                                    value="<?= e((string) $letra) ?>"
+                                    required
+                                >
+                                <span>
+                                    <strong><?= e(strtoupper((string) $letra)) ?>)</strong>
+                                    <?= e((string) $texto) ?>
+                                </span>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <div class="field">
+                        <label for="resposta-<?= (int) $q['id'] ?>">Sua resposta</label>
+                        <textarea
+                            id="resposta-<?= (int) $q['id'] ?>"
+                            name="respostas[<?= (int) $q['id'] ?>]"
+                            rows="5"
+                            maxlength="500"
+                            class="code-input"
+                            required
+                        ></textarea>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+
+        <button type="submit" class="btn btn-success" style="margin-bottom:60px;">
+            Finalizar prova<?= !empty($isGuest) ? ' nesta sessão' : '' ?>
+        </button>
+    </form>
+<?php endif; ?>
