@@ -183,7 +183,11 @@ if (!function_exists('safe_lesson_html')) {
 
                     if ($tag === 'a' && $child->hasAttribute('href')) {
                         $href = trim($child->getAttribute('href'));
-                        $safeHref = str_starts_with($href, '/') || str_starts_with($href, '#');
+                        // Relativo interno de verdade: começa com "/" mas não é
+                        // protocol-relative ("//host/..."), que o navegador resolve
+                        // como URL absoluta para outro domínio. "#" também é seguro.
+                        $safeHref = ($href !== '' && $href[0] === '/' && !str_starts_with($href, '//'))
+                            || str_starts_with($href, '#');
                         if (!$safeHref) {
                             $hrefParts = parse_url($href);
                             $hrefScheme = is_array($hrefParts)
