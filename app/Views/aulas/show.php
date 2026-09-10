@@ -17,6 +17,13 @@
     <?php endif; ?>
 </div>
 
+<div class="lesson-reading-wrap" aria-label="Progresso da leitura">
+    <div class="lesson-reading-meter">
+        <span data-reading-bar></span>
+    </div>
+    <small class="lesson-reading-label" data-reading-label>Leitura da aula: 0%</small>
+</div>
+
 <?php
 $embedUrl = video_embed_url($lesson['video_url'] ?? null);
 if ($embedUrl):
@@ -37,6 +44,18 @@ if ($embedUrl):
 
 <div class="lesson-content">
     <?= safe_lesson_html($lesson['content'] ?? '') ?>
+</div>
+
+<div
+    class="lesson-interactive-host"
+    data-lesson-interactive
+    data-lesson-slug="<?= e((string) $lesson['slug']) ?>"
+    data-challenge-src="<?= asset('data/lesson-challenges.json') ?>"
+>
+    <div class="interactive-loading">Preparando seu laboratório interativo...</div>
+    <noscript>
+        <div class="alert alert-error">Ative o JavaScript para usar o Desafio Relâmpago desta aula.</div>
+    </noscript>
 </div>
 
 <div class="lesson-actions">

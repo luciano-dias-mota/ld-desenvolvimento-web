@@ -35,4 +35,5 @@
 <footer class="footer"><div class="container"><p>&copy; <?= date('Y') ?> LD Desenvolvimento Web — Plataforma de aprendizado gamificado.</p><span class="footer-status">Sistema online</span></div></footer>
 </div>
 <script src="<?= asset('js/theme.js') ?>"></script>
+<?php if (!empty($lesson)): ?><script src="<?= asset('js/lesson-interactive.js') ?>" defer></script><?php endif; ?>
 </body></html>

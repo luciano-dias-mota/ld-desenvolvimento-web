@@ -1,0 +1,1606 @@
+{
+  "algoritmos-e-programas": {
+    "lesson_title": "O que é programação, algoritmo e programa",
+    "module_number": 1,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "ENTRADA: titulo, descricao, prioridade\n___ os dados recebidos\nCRIAR o chamado\nSALVAR o chamado\nSAIDA: numero do chamado criado",
+    "required": [
+      "VALIDAR"
+    ],
+    "hint": "Volte ao conceito “Problema, algoritmo, programa, entrada, processamento e saída” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "ENTRADA: titulo, descricao, prioridade\nVALIDAR os dados recebidos\nCRIAR o chamado\nSALVAR o chamado\nSAIDA: numero do chamado criado",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Problema, algoritmo, programa, entrada, processamento e saída",
+      "sequência determinística de passos",
+      "exemplos cotidianos."
+    ]
+  },
+  "variaveis-e-valores": {
+    "lesson_title": "Variáveis, valores e tipos de informação",
+    "module_number": 1,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "nome = \"Ana\"\nidade = 22\n___ = falso\nprioridade = \"alta\"\ntempoAtendimentoMinutos = 35",
+    "required": [
+      "chamadoResolvido"
+    ],
+    "hint": "Volte ao conceito “Variável como nome associado a um valor” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "nome = \"Ana\"\nidade = 22\nchamadoResolvido = falso\nprioridade = \"alta\"\ntempoAtendimentoMinutos = 35",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Variável como nome associado a um valor",
+      "diferença entre dado e informação",
+      "texto, número, lógico e ausência de valor."
+    ]
+  },
+  "operadores-e-expressoes": {
+    "lesson_title": "Operadores, expressões e comparações",
+    "module_number": 1,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "horas = 2\nminutos = 30\ntotalMinutos = (horas * 60) + minutos\nprioridadeAlta = ___",
+    "required": [
+      "impacto >= 8 E urgencia >= 8"
+    ],
+    "hint": "Volte ao conceito “Operadores aritméticos, relacionais e lógicos” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "horas = 2\nminutos = 30\ntotalMinutos = (horas * 60) + minutos\nprioridadeAlta = impacto >= 8 E urgencia >= 8",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Operadores aritméticos, relacionais e lógicos",
+      "precedência",
+      "expressões que produzem resultados."
+    ]
+  },
+  "decisoes-e-logica-booleana": {
+    "lesson_title": "Decisões e lógica booleana",
+    "module_number": 1,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "SE ___\n    prioridade = \"critica\"\nSENAO SE impactoAlto OU urgenciaAlta\n    prioridade = \"alta\"\nSENAO\n    prioridade = \"normal\"\nFIM SE",
+    "required": [
+      "impactoAlto E urgenciaAlta"
+    ],
+    "hint": "Volte ao conceito “Condição, verdadeiro/falso, AND, OR, NOT” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "SE impactoAlto E urgenciaAlta\n    prioridade = \"critica\"\nSENAO SE impactoAlto OU urgenciaAlta\n    prioridade = \"alta\"\nSENAO\n    prioridade = \"normal\"\nFIM SE",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Condição, verdadeiro/falso, AND, OR, NOT",
+      "decisões encadeadas",
+      "tabela-verdade simplificada."
+    ]
+  },
+  "repeticao-e-contadores": {
+    "lesson_title": "Repetição e contadores",
+    "module_number": 1,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "soma = 0\nPARA contador DE 1 ATE 5\n    LER tempo\n    ___\nFIM PARA\nmedia = soma / 5",
+    "required": [
+      "soma = soma + tempo"
+    ],
+    "hint": "Volte ao conceito “Por que repetir instruções” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "soma = 0\nPARA contador DE 1 ATE 5\n    LER tempo\n    soma = soma + tempo\nFIM PARA\nmedia = soma / 5",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Por que repetir instruções",
+      "condição de parada",
+      "contador",
+      "acumulador"
+    ]
+  },
+  "funcoes-e-decomposicao": {
+    "lesson_title": "Funções e decomposição de problemas",
+    "module_number": 1,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "___(impacto, urgencia)\n    SE impacto >= 8 E urgencia >= 8\n        RETORNAR \"critica\"\n    FIM SE\n    RETORNAR \"normal\"\nFIM FUNCAO",
+    "required": [
+      "FUNCAO calcularPrioridade"
+    ],
+    "hint": "Volte ao conceito “Dividir um problema grande em tarefas menores” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "FUNCAO calcularPrioridade(impacto, urgencia)\n    SE impacto >= 8 E urgencia >= 8\n        RETORNAR \"critica\"\n    FIM SE\n    RETORNAR \"normal\"\nFIM FUNCAO",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Dividir um problema grande em tarefas menores",
+      "parâmetros",
+      "retorno e responsabilidade única"
+    ]
+  },
+  "pseudocodigo-teste-de-mesa": {
+    "lesson_title": "Pseudocódigo, teste de mesa e depuração",
+    "module_number": 1,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "idade = 17\n___\n    resultado = \"adulto\"\nSENAO\n    resultado = \"menor\"\nFIM SE\n\nTeste de mesa:\nidade=17 -> condicao=false -> resultado=\"menor\" ",
+    "required": [
+      "SE idade >= 18"
+    ],
+    "hint": "Volte ao conceito “Pseudocódigo” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "idade = 17\nSE idade >= 18\n    resultado = \"adulto\"\nSENAO\n    resultado = \"menor\"\nFIM SE\n\nTeste de mesa:\nidade=17 -> condicao=false -> resultado=\"menor\" ",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Pseudocódigo",
+      "rastreamento manual de valores",
+      "hipótese de erro",
+      "reprodução e correção"
+    ]
+  },
+  "ambiente-php": {
+    "lesson_title": "Preparando o ambiente: PHP, VS Code, XAMPP e terminal",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "___\nphp ola.php\n\n# No XAMPP, um arquivo em htdocs/meu-projeto/index.php\n# pode ser acessado pelo navegador via servidor local.",
+    "required": [
+      "php -v"
+    ],
+    "hint": "Volte ao conceito “Servidor web x CLI” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "php -v\nphp ola.php\n\n# No XAMPP, um arquivo em htdocs/meu-projeto/index.php\n# pode ser acessado pelo navegador via servidor local.",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Servidor web x CLI",
+      "php -v",
+      "pasta pública",
+      "Apache"
+    ]
+  },
+  "sintaxe-echo-comentarios": {
+    "lesson_title": "Tags PHP, `echo`, comentários e arquivos PHP puros",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n// Comentario de uma linha\n$curso = 'PHP Moderno';\n\n___ \"Curso: \" . $curso;\n// Em arquivo PHP puro, normalmente nao fechamos a tag PHP.",
+    "required": [
+      "echo"
+    ],
+    "hint": "Volte ao conceito “<?php” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n// Comentario de uma linha\n$curso = 'PHP Moderno';\n\necho \"Curso: \" . $curso;\n// Em arquivo PHP puro, normalmente nao fechamos a tag PHP.",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "<?php",
+      "echo",
+      "//, #, /* */",
+      "ponto e vírgula"
+    ]
+  },
+  "variaveis-constantes-tipos": {
+    "lesson_title": "Variáveis, constantes, tipos e `null`",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$nome = 'Marina';      // string\n$idade = 28;           // int\n$altura = 1.68;        // float\n$ativo = true;         // bool\n$apelido = null;       // null\n\n___ = 'Helpdesk';",
+    "required": [
+      "const APP_NAME"
+    ],
+    "hint": "Volte ao conceito “Prefixo $” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$nome = 'Marina';      // string\n$idade = 28;           // int\n$altura = 1.68;        // float\n$ativo = true;         // bool\n$apelido = null;       // null\n\nconst APP_NAME = 'Helpdesk';",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Prefixo $",
+      "nomes válidos",
+      "const",
+      "define"
+    ]
+  },
+  "operadores-comparacao-estrita": {
+    "lesson_title": "Operadores e comparação estrita",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o operador para comparar valor e tipo ao mesmo tempo.",
+    "starter": "$entrada = '10';\n$numero = 10;\n\nvar_dump($entrada ___ $numero);",
+    "required": [
+      "==="
+    ],
+    "hint": "O operador estrito tem três sinais de igual.",
+    "solution": "$entrada = '10';\n$numero = 10;\n\nvar_dump($entrada === $numero);",
+    "success": "Boa! A comparação estrita diferencia a string '10' do inteiro 10.",
+    "visual_steps": [
+      "Aritméticos",
+      "concatenação",
+      "atribuição",
+      "== versus ==="
+    ]
+  },
+  "strings": {
+    "lesson_title": "Strings e manipulação de texto",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$nome = 'Luciano';\n\necho \"Ola, {$nome}!\";\necho strlen($nome);\necho strtoupper($nome);\necho ___(\"  texto  \");",
+    "required": [
+      "trim"
+    ],
+    "hint": "Volte ao conceito “Aspas simples/duplas” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$nome = 'Luciano';\n\necho \"Ola, {$nome}!\";\necho strlen($nome);\necho strtoupper($nome);\necho trim(\"  texto  \");",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Aspas simples/duplas",
+      "interpolação",
+      "concatenação",
+      "strlen"
+    ]
+  },
+  "arrays": {
+    "lesson_title": "Arrays indexados, associativos e multidimensionais",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$tecnologias = ['PHP', 'MySQL', 'Laravel'];\n\n$usuario = [\n    'nome' => 'Ana',\n    'email' => 'ana@example.test',\n];\n\necho ___;",
+    "required": [
+      "$usuario['nome']"
+    ],
+    "hint": "Volte ao conceito “Criação” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$tecnologias = ['PHP', 'MySQL', 'Laravel'];\n\n$usuario = [\n    'nome' => 'Ana',\n    'email' => 'ana@example.test',\n];\n\necho $usuario['nome'];",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Criação",
+      "leitura",
+      "alteração",
+      "[]"
+    ]
+  },
+  "condicionais-php": {
+    "lesson_title": "Condicionais: `if`, `elseif`, `switch` e `match`",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$status = 'aberto';\n\n$mensagem = ___ ($status) {\n    'aberto' => 'Aguardando atendimento',\n    'em_atendimento' => 'Tecnico trabalhando',\n    'resolvido' => 'Chamado finalizado',\n    default => 'Status desconhecido',\n};\n\necho $mensagem;",
+    "required": [
+      "match"
+    ],
+    "hint": "Volte ao conceito “if/elseif/else” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$status = 'aberto';\n\n$mensagem = match ($status) {\n    'aberto' => 'Aguardando atendimento',\n    'em_atendimento' => 'Tecnico trabalhando',\n    'resolvido' => 'Chamado finalizado',\n    default => 'Status desconhecido',\n};\n\necho $mensagem;",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "if/elseif/else",
+      "comparação estrita",
+      "switch",
+      "expressão match"
+    ]
+  },
+  "lacos-php": {
+    "lesson_title": "Laços: `for`, `while`, `do while` e `foreach`",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$usuarios = [\n    ['nome' => 'Ana'],\n    ['nome' => 'Bruno'],\n];\n\n___ ($usuarios as $usuario) {\n    echo $usuario['nome'] . PHP_EOL;\n}",
+    "required": [
+      "foreach"
+    ],
+    "hint": "Volte ao conceito “Iteração, break, continue, chave/valor” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$usuarios = [\n    ['nome' => 'Ana'],\n    ['nome' => 'Bruno'],\n];\n\nforeach ($usuarios as $usuario) {\n    echo $usuario['nome'] . PHP_EOL;\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Iteração, break, continue, chave/valor",
+      "foreach com arrays e objetos Traversable",
+      "evitar laços infinitos."
+    ]
+  },
+  "funcoes-php": {
+    "lesson_title": "Funções, parâmetros e tipos",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o tipo de retorno da função de SLA.",
+    "starter": "function calcularSla(string $prioridade): ___\n{\n    return $prioridade === 'alta' ? 60 : 240;\n}",
+    "required": [
+      "int"
+    ],
+    "hint": "A função devolve um número inteiro de minutos.",
+    "solution": "function calcularSla(string $prioridade): int\n{\n    return $prioridade === 'alta' ? 60 : 240;\n}",
+    "success": "Certo. O tipo de retorno deixa explícito que o SLA será um inteiro.",
+    "visual_steps": [
+      "Declaração",
+      "parâmetros",
+      "valores padrão",
+      "retorno"
+    ]
+  },
+  "erros-excecoes-require": {
+    "lesson_title": "Erros, exceções, `require` e organização inicial",
+    "module_number": 2,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o comando que carrega o arquivo apenas uma vez.",
+    "starter": "___ __DIR__ . '/funcoes.php';",
+    "required": [
+      "require_once"
+    ],
+    "hint": "É a versão de require que evita inclusão duplicada.",
+    "solution": "require_once __DIR__ . '/funcoes.php';",
+    "success": "Isso. require_once evita carregar o mesmo arquivo mais de uma vez.",
+    "visual_steps": [
+      "require, require_once, include",
+      "warnings x exceptions",
+      "try/catch/finally",
+      "Throwable"
+    ]
+  },
+  "http-e-https": {
+    "lesson_title": "Como a Web funciona: cliente, servidor, HTTP e HTTPS",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o protocolo seguro usado para proteger os dados em trânsito.",
+    "starter": "___://lddesenvolvimento.alwaysdata.net",
+    "required": [
+      "https"
+    ],
+    "hint": "É o HTTP protegido por TLS.",
+    "solution": "https://lddesenvolvimento.alwaysdata.net",
+    "success": "Perfeito. HTTPS protege a comunicação entre navegador e servidor.",
+    "visual_steps": [
+      "URL, DNS em alto nível, request/response, método, cabeçalhos, corpo, status HTTP",
+      "HTTPS protege o transporte",
+      "servidor PHP gera resposta."
+    ]
+  },
+  "html-formularios": {
+    "lesson_title": "HTML semântico e formulários acessíveis",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o atributo que define a chave enviada ao servidor.",
+    "starter": "<label for=\"titulo\">Título</label>\n<input type=\"text\" ___=\"titulo\" id=\"titulo\">",
+    "required": [
+      "name"
+    ],
+    "hint": "É o atributo que vira a chave em $_POST ou $_GET.",
+    "solution": "<label for=\"titulo\">Título</label>\n<input type=\"text\" name=\"titulo\" id=\"titulo\">",
+    "success": "Certo. Sem name, o valor do campo não é enviado com essa chave.",
+    "visual_steps": [
+      "Estrutura HTML",
+      "form",
+      "label",
+      "input"
+    ]
+  },
+  "get-post-superglobais": {
+    "lesson_title": "GET, POST e superglobais",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$busca = trim((string) ($_GET['q'] ?? ''));\n$email = trim((string) (___['email'] ?? ''));\n\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    // processar alteracao de estado\n}",
+    "required": [
+      "$_POST"
+    ],
+    "hint": "Volte ao conceito “Semântica de GET para leitura e POST para submissão” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$busca = trim((string) ($_GET['q'] ?? ''));\n$email = trim((string) ($_POST['email'] ?? ''));\n\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    // processar alteracao de estado\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Semântica de GET para leitura e POST para submissão",
+      "$_GET, $_POST, $_SERVER",
+      "POST não é criptografia",
+      "PRG introdução."
+    ]
+  },
+  "validacao-normalizacao": {
+    "lesson_title": "Validação, normalização e mensagens de erro",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$email = strtolower(trim((string) ($_POST['email'] ?? '')));\n\n$erros = [];\nif (!filter_var($email, ___)) {\n    $erros[] = 'Informe um e-mail valido.';\n}",
+    "required": [
+      "FILTER_VALIDATE_EMAIL"
+    ],
+    "hint": "Volte ao conceito “Não confiar no cliente” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$email = strtolower(trim((string) ($_POST['email'] ?? '')));\n\n$erros = [];\nif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {\n    $erros[] = 'Informe um e-mail valido.';\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Não confiar no cliente",
+      "trim, validação de tamanho, tipo e formato",
+      "filter_var",
+      "separar normalização de validação"
+    ]
+  },
+  "xss-escape-saida": {
+    "lesson_title": "Escape de saída e prevenção de XSS",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a função usada para escapar texto antes de exibi-lo em HTML.",
+    "starter": "echo ___($nome, ENT_QUOTES, 'UTF-8');",
+    "required": [
+      "htmlspecialchars"
+    ],
+    "hint": "Ela converte caracteres especiais em entidades HTML.",
+    "solution": "echo htmlspecialchars($nome, ENT_QUOTES, 'UTF-8');",
+    "success": "Boa. Assim texto não confiável é exibido como texto, não como HTML executável.",
+    "visual_steps": [
+      "Entrada não confiável",
+      "XSS refletido/armazenado em alto nível",
+      "escape no momento da saída",
+      "htmlspecialchars(..., ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')"
+    ]
+  },
+  "cookies-sessoes": {
+    "lesson_title": "Cookies, sessões e autenticação básica",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a função que inicia ou retoma a sessão PHP.",
+    "starter": "___();\n$_SESSION['user_id'] = 42;",
+    "required": [
+      "session_start"
+    ],
+    "hint": "A função começa com session_.",
+    "solution": "session_start();\n$_SESSION['user_id'] = 42;",
+    "success": "Certo. A sessão precisa estar iniciada antes de usar $_SESSION.",
+    "visual_steps": [
+      "Diferença cookie/sessão",
+      "session_start",
+      "dados de sessão no servidor",
+      "cookie de sessão"
+    ]
+  },
+  "csrf-prg": {
+    "lesson_title": "CSRF, redirects e padrão POST/Redirect/GET",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n// POST: validar CSRF, alterar o estado e redirecionar.\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    validarCsrf();\n    salvar();\n    ___('Location: /sucesso');\n    exit;\n}",
+    "required": [
+      "header"
+    ],
+    "hint": "Volte ao conceito “CSRF” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n// POST: validar CSRF, alterar o estado e redirecionar.\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    validarCsrf();\n    salvar();\n    header('Location: /sucesso');\n    exit;\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "CSRF",
+      "token imprevisível em sessão",
+      "hash_equals",
+      "ações de estado com POST"
+    ]
+  },
+  "upload-arquivos-seguro": {
+    "lesson_title": "Upload de arquivos com segurança",
+    "module_number": 3,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a função que gera bytes aleatórios para criar um nome imprevisível de arquivo.",
+    "starter": "$nomeSeguro = bin2hex(___(16)) . '.pdf';",
+    "required": [
+      "random_bytes"
+    ],
+    "hint": "Evite confiar no nome original enviado pelo usuário.",
+    "solution": "$nomeSeguro = bin2hex(random_bytes(16)) . '.pdf';",
+    "success": "Boa. Nomes gerados no servidor ajudam a evitar colisões e caminhos previsíveis.",
+    "visual_steps": [
+      "$_FILES",
+      "limites de tamanho",
+      "validar MIME real",
+      "nomes aleatórios"
+    ]
+  },
+  "modelo-relacional": {
+    "lesson_title": "Modelo relacional e normalização básica",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "usuarios\n- id (PK)\n- nome\n- email\n\nchamados\n- id (PK)\n- ___ (FK -> usuarios.id)\n- titulo\n- status",
+    "required": [
+      "usuario_id"
+    ],
+    "hint": "Volte ao conceito “Tabela, linha, coluna, entidade, relacionamento” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "usuarios\n- id (PK)\n- nome\n- email\n\nchamados\n- id (PK)\n- usuario_id (FK -> usuarios.id)\n- titulo\n- status",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Tabela, linha, coluna, entidade, relacionamento",
+      "redundância",
+      "1FN/2FN/3FN de forma prática",
+      "quando normalizar."
+    ]
+  },
+  "tipos-chaves-indices": {
+    "lesson_title": "Tipos, chaves, constraints e índices",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a constraint para impedir e-mails duplicados.",
+    "starter": "email VARCHAR(255) NOT NULL ___",
+    "required": [
+      "UNIQUE"
+    ],
+    "hint": "Ela exige que cada valor dessa coluna seja único.",
+    "solution": "email VARCHAR(255) NOT NULL UNIQUE",
+    "success": "Certo. UNIQUE protege a regra diretamente no banco.",
+    "visual_steps": [
+      "INT/BIGINT, VARCHAR, TEXT, DATETIME/TIMESTAMP, DECIMAL, BOOLEAN/TINYINT",
+      "PK, FK, UNIQUE, NOT NULL, DEFAULT, CHECK quando suportado",
+      "índices e custo de escrita."
+    ]
+  },
+  "ddl-create-alter-drop": {
+    "lesson_title": "DDL: CREATE, ALTER e DROP com cautela",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o comando DDL que cria uma nova tabela.",
+    "starter": "___ TABLE tickets (\n    id INT PRIMARY KEY AUTO_INCREMENT,\n    title VARCHAR(150) NOT NULL\n);",
+    "required": [
+      "CREATE"
+    ],
+    "hint": "É o verbo SQL de criação.",
+    "solution": "CREATE TABLE tickets (\n    id INT PRIMARY KEY AUTO_INCREMENT,\n    title VARCHAR(150) NOT NULL\n);",
+    "success": "Isso. CREATE constrói a estrutura; ALTER modifica e DROP remove.",
+    "visual_steps": [
+      "CREATE TABLE, ALTER TABLE, DROP",
+      "charset utf8mb4",
+      "InnoDB",
+      "migrations conceituais"
+    ]
+  },
+  "select-filtros-ordenacao": {
+    "lesson_title": "SELECT, WHERE, ORDER BY e LIMIT",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a cláusula que filtra somente chamados abertos.",
+    "starter": "SELECT *\nFROM tickets\n___ status = 'aberto'\nORDER BY created_at DESC\nLIMIT 20;",
+    "required": [
+      "WHERE"
+    ],
+    "hint": "Ela vem depois de FROM e antes de ORDER BY.",
+    "solution": "SELECT *\nFROM tickets\nWHERE status = 'aberto'\nORDER BY created_at DESC\nLIMIT 20;",
+    "success": "Certo. WHERE restringe as linhas antes da ordenação e do limite.",
+    "visual_steps": [
+      "Projeção de colunas",
+      "filtros",
+      "AND/OR, IN, BETWEEN, LIKE, IS NULL",
+      "ordenação"
+    ]
+  },
+  "joins": {
+    "lesson_title": "JOINs e relacionamentos",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "SELECT\n    c.id,\n    c.titulo,\n    u.nome AS solicitante\nFROM chamados c\n___ usuarios u ON u.id = c.usuario_id\nORDER BY c.id DESC;",
+    "required": [
+      "INNER JOIN"
+    ],
+    "hint": "Volte ao conceito “INNER JOIN, LEFT JOIN” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "SELECT\n    c.id,\n    c.titulo,\n    u.nome AS solicitante\nFROM chamados c\nINNER JOIN usuarios u ON u.id = c.usuario_id\nORDER BY c.id DESC;",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "INNER JOIN, LEFT JOIN",
+      "aliases",
+      "relacionar ticket, solicitante e categoria",
+      "evitar duplicação de query."
+    ]
+  },
+  "agregacoes-group-by": {
+    "lesson_title": "Agregações, GROUP BY e HAVING",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a função de agregação que conta registros por status.",
+    "starter": "SELECT status, ___(*) AS total\nFROM tickets\nGROUP BY status;",
+    "required": [
+      "COUNT"
+    ],
+    "hint": "É a função SQL usada para contagem.",
+    "solution": "SELECT status, COUNT(*) AS total\nFROM tickets\nGROUP BY status;",
+    "success": "Boa. COUNT junto com GROUP BY produz um total para cada grupo.",
+    "visual_steps": [
+      "COUNT, SUM, AVG, MIN, MAX",
+      "agrupamento",
+      "HAVING",
+      "dashboard por status e por técnico."
+    ]
+  },
+  "dml-transacoes": {
+    "lesson_title": "INSERT, UPDATE, DELETE e transações",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método PDO que inicia uma transação.",
+    "starter": "$pdo->___();\ntry {\n    // alterações relacionadas\n    $pdo->commit();\n} catch (Throwable $e) {\n    $pdo->rollBack();\n}",
+    "required": [
+      "beginTransaction"
+    ],
+    "hint": "O nome significa literalmente 'iniciar transação'.",
+    "solution": "$pdo->beginTransaction();\ntry {\n    // alterações relacionadas\n    $pdo->commit();\n} catch (Throwable $e) {\n    $pdo->rollBack();\n}",
+    "success": "Perfeito. A transação mantém operações relacionadas como uma unidade.",
+    "visual_steps": [
+      "DML",
+      "atomicidade",
+      "START TRANSACTION, COMMIT, ROLLBACK",
+      "cuidado com UPDATE/DELETE sem WHERE"
+    ]
+  },
+  "pdo-conexao": {
+    "lesson_title": "Conectando com PDO de forma segura",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n$dsn = 'mysql:host=localhost;dbname=helpdesk;charset=utf8mb4';\n\n$pdo = ___($dsn, $user, $password, [\n    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n    PDO::ATTR_EMULATE_PREPARES => false,\n]);",
+    "required": [
+      "new PDO"
+    ],
+    "hint": "Volte ao conceito “DSN, charset, exceções, fetch mode, emulação de prepares” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n$dsn = 'mysql:host=localhost;dbname=helpdesk;charset=utf8mb4';\n\n$pdo = new PDO($dsn, $user, $password, [\n    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n    PDO::ATTR_EMULATE_PREPARES => false,\n]);",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "DSN, charset, exceções, fetch mode, emulação de prepares",
+      "credenciais fora do código",
+      "configuração por ambiente",
+      "mensagem de erro genérica ao usuário."
+    ]
+  },
+  "pdo-prepared-statements": {
+    "lesson_title": "Prepared Statements e parâmetros",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método que prepara a consulta antes de enviar os valores.",
+    "starter": "$stmt = $pdo->___('SELECT * FROM users WHERE email = ?');\n$stmt->execute([$email]);",
+    "required": [
+      "prepare"
+    ],
+    "hint": "Prepare a estrutura SQL primeiro e execute com parâmetros depois.",
+    "solution": "$stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');\n$stmt->execute([$email]);",
+    "success": "Certo. prepare + execute separa a estrutura da consulta dos valores.",
+    "visual_steps": [
+      "Placeholders posicionais/nomeados",
+      "prepare + execute",
+      "parâmetros são valores",
+      "allowlist para identificadores"
+    ]
+  },
+  "crud-pdo-completo": {
+    "lesson_title": "CRUD completo, busca e paginação com PDO",
+    "module_number": 4,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método HTTP adequado para uma ação que altera dados.",
+    "starter": "<form method=\"___\" action=\"/usuarios/excluir\">\n    <input type=\"hidden\" name=\"id\" value=\"42\">\n</form>",
+    "required": [
+      "POST"
+    ],
+    "hint": "Excluir não deve ser uma ação simples por GET.",
+    "solution": "<form method=\"POST\" action=\"/usuarios/excluir\">\n    <input type=\"hidden\" name=\"id\" value=\"42\">\n</form>",
+    "success": "Isso. Mudanças de estado devem usar método apropriado e proteção CSRF.",
+    "visual_steps": [
+      "Create/Read/Update/Delete",
+      "password_hash/password_verify",
+      "paginação",
+      "filtros"
+    ]
+  },
+  "classes-objetos": {
+    "lesson_title": "Classes, objetos, propriedades e métodos",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\nfinal class Chamado\n{\n    public string $titulo;\n\n    public function exibirTitulo(): string\n    {\n        return $this->titulo;\n    }\n}\n\n$chamado = ___();\n$chamado->titulo = 'Impressora sem rede';",
+    "required": [
+      "new Chamado"
+    ],
+    "hint": "Volte ao conceito “Classe como modelo” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nfinal class Chamado\n{\n    public string $titulo;\n\n    public function exibirTitulo(): string\n    {\n        return $this->titulo;\n    }\n}\n\n$chamado = new Chamado();\n$chamado->titulo = 'Impressora sem rede';",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Classe como modelo",
+      "instância",
+      "$this",
+      "propriedades e métodos"
+    ]
+  },
+  "construtor-tipos": {
+    "lesson_title": "Construtor, tipos e property promotion",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método especial chamado quando o objeto é criado.",
+    "starter": "final class Usuario\n{\n    public function ___(public string $nome, public string $email) {}\n}",
+    "required": [
+      "__construct"
+    ],
+    "hint": "O nome começa com dois underscores.",
+    "solution": "final class Usuario\n{\n    public function __construct(public string $nome, public string $email) {}\n}",
+    "success": "Certo. O construtor ajuda a criar objetos já em estado válido.",
+    "visual_steps": [
+      "__construct",
+      "propriedades tipadas",
+      "constructor property promotion",
+      "nullable"
+    ]
+  },
+  "encapsulamento-invariantes": {
+    "lesson_title": "Encapsulamento e invariantes",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\nfinal class Conta\n{\n    ___ = 0;\n\n    public function depositar(float $valor): void\n    {\n        if ($valor <= 0) {\n            throw new InvalidArgumentException('Valor invalido.');\n        }\n\n        $this->saldo += $valor;\n    }\n}",
+    "required": [
+      "private float $saldo"
+    ],
+    "hint": "Volte ao conceito “public, protected, private” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nfinal class Conta\n{\n    private float $saldo = 0;\n\n    public function depositar(float $valor): void\n    {\n        if ($valor <= 0) {\n            throw new InvalidArgumentException('Valor invalido.');\n        }\n\n        $this->saldo += $valor;\n    }\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "public, protected, private",
+      "getters com propósito",
+      "impedir estados inválidos",
+      "comportamento em vez de setters indiscriminados."
+    ]
+  },
+  "heranca-composicao": {
+    "lesson_title": "Herança x composição",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\nfinal class Notificador\n{\n    public function __construct(\n        ___\n    ) {}\n\n    public function enviar(string $mensagem): void\n    {\n        $this->emailSender->send($mensagem);\n    }\n}",
+    "required": [
+      "private EmailSender $emailSender"
+    ],
+    "hint": "Volte ao conceito “extends” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nfinal class Notificador\n{\n    public function __construct(\n        private EmailSender $emailSender\n    ) {}\n\n    public function enviar(string $mensagem): void\n    {\n        $this->emailSender->send($mensagem);\n    }\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "extends",
+      "relação is-a",
+      "composição has-a",
+      "favorecer composição quando reduz acoplamento"
+    ]
+  },
+  "interfaces-polimorfismo": {
+    "lesson_title": "Interfaces, classes abstratas e polimorfismo",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n___\n{\n    public function enviar(string $mensagem): void;\n}\n\nfinal class EmailNotificacao implements Notificacao\n{\n    public function enviar(string $mensagem): void\n    {\n        // envio de e-mail\n    }\n}",
+    "required": [
+      "interface Notificacao"
+    ],
+    "hint": "Volte ao conceito “Contratos” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\ninterface Notificacao\n{\n    public function enviar(string $mensagem): void;\n}\n\nfinal class EmailNotificacao implements Notificacao\n{\n    public function enviar(string $mensagem): void\n    {\n        // envio de e-mail\n    }\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Contratos",
+      "implements",
+      "métodos abstratos",
+      "dependência de abstrações"
+    ]
+  },
+  "namespaces-use": {
+    "lesson_title": "Namespaces, `use` e organização de classes",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n___\n\nuse App\\Repositories\\ChamadoRepository;\n\nfinal class ChamadoService\n{\n    public function __construct(\n        private ChamadoRepository $repository\n    ) {}\n}",
+    "required": [
+      "namespace App\\Services;"
+    ],
+    "hint": "Volte ao conceito “Namespace, FQCN, use, aliases” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nnamespace App\\Services;\n\nuse App\\Repositories\\ChamadoRepository;\n\nfinal class ChamadoService\n{\n    public function __construct(\n        private ChamadoRepository $repository\n    ) {}\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Namespace, FQCN, use, aliases",
+      "relação com diretórios e PSR-4",
+      "evitar colisões."
+    ]
+  },
+  "traits-final-static-enums": {
+    "lesson_title": "Traits, `final`, `static` e Enums",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n___: string\n{\n    case Aberto = 'aberto';\n    case EmAtendimento = 'em_atendimento';\n    case Resolvido = 'resolvido';\n}\n\nfinal class Chamado\n{\n    public function __construct(\n        public StatusChamado $status\n    ) {}\n}",
+    "required": [
+      "enum StatusChamado"
+    ],
+    "hint": "Volte ao conceito “Quando usar trait” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nenum StatusChamado: string\n{\n    case Aberto = 'aberto';\n    case EmAtendimento = 'em_atendimento';\n    case Resolvido = 'resolvido';\n}\n\nfinal class Chamado\n{\n    public function __construct(\n        public StatusChamado $status\n    ) {}\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Quando usar trait",
+      "limites de estado global estático",
+      "final",
+      "enums backed para status controlados"
+    ]
+  },
+  "excecoes-dominio": {
+    "lesson_title": "Exceções e erros de domínio",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\nfinal class TransicaoInvalida extends DomainException {}\n\nfunction resolverChamado(string $statusAtual): void\n{\n    if ($statusAtual === 'cancelado') {\n        ___(\n            'Chamado cancelado nao pode ser resolvido.'\n        );\n    }\n}",
+    "required": [
+      "throw new TransicaoInvalida"
+    ],
+    "hint": "Volte ao conceito “Exceções específicas” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nfinal class TransicaoInvalida extends DomainException {}\n\nfunction resolverChamado(string $statusAtual): void\n{\n    if ($statusAtual === 'cancelado') {\n        throw new TransicaoInvalida(\n            'Chamado cancelado nao pode ser resolvido.'\n        );\n    }\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Exceções específicas",
+      "RuntimeException x exceção de domínio",
+      "não usar exceção para fluxo comum",
+      "captura na fronteira adequada."
+    ]
+  },
+  "solid-introducao": {
+    "lesson_title": "SOLID introdutório e mini-domínio",
+    "module_number": 5,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o contrato para que o serviço dependa de uma abstração.",
+    "starter": "final class EmailNotifier implements ___\n{\n    public function send(string $message): void {}\n}",
+    "required": [
+      "NotifierInterface"
+    ],
+    "hint": "O nome do contrato pode terminar com Interface.",
+    "solution": "final class EmailNotifier implements NotifierInterface\n{\n    public function send(string $message): void {}\n}",
+    "success": "Boa. Depender de um contrato facilita trocar implementações e testar.",
+    "visual_steps": [
+      "SRP, OCP, LSP, ISP, DIP em linguagem simples",
+      "coesão, acoplamento, composição",
+      "refatoração incremental sem overengineering."
+    ]
+  },
+  "composer-dependencias": {
+    "lesson_title": "Composer: dependências, `composer.json` e `composer.lock`",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "composer init\ncomposer require vlucas/phpdotenv\n___\ncomposer update\n\n# composer.lock deve ser versionado em aplicacoes.",
+    "required": [
+      "composer install"
+    ],
+    "hint": "Volte ao conceito “composer init, require, install, update” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "composer init\ncomposer require vlucas/phpdotenv\ncomposer install\ncomposer update\n\n# composer.lock deve ser versionado em aplicacoes.",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "composer init, require, install, update",
+      "diferença install/update",
+      "versionamento do lock",
+      "scripts"
+    ]
+  },
+  "psr4-psr12": {
+    "lesson_title": "Autoload PSR-4 e padrão PSR-12",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "{\n    \"autoload\": {\n        \"psr-4\": {\n            \"App\\\\\": \"app/\"\n        }\n    }\n}\n\n# Depois de alterar autoload:\n___",
+    "required": [
+      "composer dump-autoload"
+    ],
+    "hint": "Volte ao conceito “Namespace → diretório” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "{\n    \"autoload\": {\n        \"psr-4\": {\n            \"App\\\\\": \"app/\"\n        }\n    }\n}\n\n# Depois de alterar autoload:\ncomposer dump-autoload",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Namespace → diretório",
+      "composer dump-autoload",
+      "nomes de classe/arquivo",
+      "PSR-12"
+    ]
+  },
+  "front-controller-router": {
+    "lesson_title": "Front Controller, ciclo da requisição e Router",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\n// public/index.php\n___\n\n$app = new App();\n$app->run();",
+    "required": [
+      "require __DIR__ . '/../vendor/autoload.php';"
+    ],
+    "hint": "Volte ao conceito “public/index.php” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\n// public/index.php\nrequire __DIR__ . '/../vendor/autoload.php';\n\n$app = new App();\n$app->run();",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "public/index.php",
+      ".htaccess/rewrite em alto nível",
+      "request → router → controller → response",
+      "rotas parametrizadas"
+    ]
+  },
+  "mvc-responsabilidades": {
+    "lesson_title": "MVC e separação de responsabilidades",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "Controller -> recebe a requisicao e coordena o fluxo\nService    -> regra de negocio\n___\nView       -> apresenta dados\nModel      -> representa dados/comportamentos do dominio",
+    "required": [
+      "Repository -> persistencia/consultas"
+    ],
+    "hint": "Volte ao conceito “Model/dados, View/apresentação, Controller/orquestração” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "Controller -> recebe a requisicao e coordena o fluxo\nService    -> regra de negocio\nRepository -> persistencia/consultas\nView       -> apresenta dados\nModel      -> representa dados/comportamentos do dominio",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Model/dados, View/apresentação, Controller/orquestração",
+      "Controller fino",
+      "regras de negócio fora da View",
+      "evitar SQL cru no Controller."
+    ]
+  },
+  "services-repositories": {
+    "lesson_title": "Services, Repositories e regras de negócio",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\nfinal class ___\n{\n    public function __construct(\n        private ChamadoRepository $repository\n    ) {}\n\n    public function executar(array $dados): int\n    {\n        // validar regra de negocio\n        return $this->repository->criar($dados);\n    }\n}",
+    "required": [
+      "CriarChamadoService"
+    ],
+    "hint": "Volte ao conceito “Service para casos de uso/regra” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nfinal class CriarChamadoService\n{\n    public function __construct(\n        private ChamadoRepository $repository\n    ) {}\n\n    public function executar(array $dados): int\n    {\n        // validar regra de negocio\n        return $this->repository->criar($dados);\n    }\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Service para casos de uso/regra",
+      "Repository para persistência/consultas quando agrega valor",
+      "evitar camadas vazias",
+      "transações na fronteira do caso de uso."
+    ]
+  },
+  "injecao-dependencia": {
+    "lesson_title": "Injeção de dependência sem framework",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o tipo da dependência recebida pelo construtor.",
+    "starter": "public function __construct(\n    private ___ $repository\n) {}",
+    "required": [
+      "TicketRepositoryInterface"
+    ],
+    "hint": "Prefira depender do contrato quando houver mais de uma implementação possível.",
+    "solution": "public function __construct(\n    private TicketRepositoryInterface $repository\n) {}",
+    "success": "Certo. A dependência chega pronta ao objeto, em vez de ser criada dentro dele.",
+    "visual_steps": [
+      "Constructor injection",
+      "depender de interfaces",
+      "evitar new espalhado para recursos complexos",
+      "testabilidade"
+    ]
+  },
+  "config-env-logs": {
+    "lesson_title": "Configuração, `.env`, logs e tratamento de erros",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a variável de ambiente usada para o host do banco.",
+    "starter": "$host = $_ENV['___'] ?? '127.0.0.1';",
+    "required": [
+      "DB_HOST"
+    ],
+    "hint": "É a mesma convenção que você está usando no .env do projeto.",
+    "solution": "$host = $_ENV['DB_HOST'] ?? '127.0.0.1';",
+    "success": "Perfeito. Configuração sensível fica fora do código-fonte.",
+    "visual_steps": [
+      "Separar configuração de código",
+      ".env fora do Git",
+      "logs sem segredos",
+      "debug off em produção"
+    ]
+  },
+  "middleware-seguranca-mvc": {
+    "lesson_title": "Middleware, autenticação, CSRF e mini-MVC",
+    "module_number": 6,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método que associa o middleware de autenticação à rota.",
+    "starter": "$router->get('/tickets', [TicketController::class, 'index'])\n    ->___('auth');",
+    "required": [
+      "middleware"
+    ],
+    "hint": "O próprio nome descreve a camada intermediária da rota.",
+    "solution": "$router->get('/tickets', [TicketController::class, 'index'])\n    ->middleware('auth');",
+    "success": "Certo. O middleware bloqueia a requisição antes do controller quando necessário.",
+    "visual_steps": [
+      "Pipeline de middleware",
+      "auth/admin",
+      "sessão",
+      "CSRF centralizado"
+    ]
+  },
+  "laravel13-requisitos": {
+    "lesson_title": "Laravel 13 e requisitos do ambiente",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "php -v\ncomposer --version\nnode --version\nnpm --version\n\ncomposer global require laravel/installer\n___\ncd helpdesk\nnpm install\nnpm run build\ncomposer run dev",
+    "required": [
+      "laravel new helpdesk"
+    ],
+    "hint": "Volte ao conceito “Laravel 13” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "php -v\ncomposer --version\nnode --version\nnpm --version\n\ncomposer global require laravel/installer\nlaravel new helpdesk\ncd helpdesk\nnpm install\nnpm run build\ncomposer run dev",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Laravel 13",
+      "PHP 8.3+",
+      "Composer",
+      "Node/Vite"
+    ]
+  },
+  "estrutura-laravel-config": {
+    "lesson_title": "Estrutura do projeto, lifecycle e configuração",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o diretório padrão onde ficam as rotas web.",
+    "starter": "___/web.php",
+    "required": [
+      "routes"
+    ],
+    "hint": "O Laravel separa as definições de rota em uma pasta com esse nome.",
+    "solution": "routes/web.php",
+    "success": "Isso. Conhecer a estrutura evita procurar arquivos no lugar errado.",
+    "visual_steps": [
+      "app, routes, resources, database, config, storage, tests",
+      ".env",
+      "APP_KEY",
+      "lifecycle em alto nível"
+    ]
+  },
+  "rotas-controllers-binding": {
+    "lesson_title": "Rotas, Controllers e Route Model Binding",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o parâmetro que o Route Model Binding resolve automaticamente.",
+    "starter": "public function show(Ticket $___)\n{\n    return view('tickets.show', compact('ticket'));\n}",
+    "required": [
+      "Ticket $ticket"
+    ],
+    "hint": "O nome costuma corresponder ao parâmetro {ticket} da rota.",
+    "solution": "public function show(Ticket $ticket)\n{\n    return view('tickets.show', compact('ticket'));\n}",
+    "success": "Boa. O binding transforma o identificador da rota em um Model.",
+    "visual_steps": [
+      "Route::get/post",
+      "named routes",
+      "resource routes",
+      "controllers"
+    ]
+  },
+  "blade-componentes-vite": {
+    "lesson_title": "Blade, layouts, componentes e Vite",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a diretiva Blade que inclui o token de proteção em formulários POST.",
+    "starter": "<form method=\"POST\">\n    @___\n    <button>Salvar</button>\n</form>",
+    "required": [
+      "csrf"
+    ],
+    "hint": "A diretiva tem o mesmo nome do ataque que ela ajuda a impedir.",
+    "solution": "<form method=\"POST\">\n    @csrf\n    <button>Salvar</button>\n</form>",
+    "success": "Certo. @csrf gera o campo de token esperado pelo Laravel.",
+    "visual_steps": [
+      "Blade escaping {{ }}",
+      "{!! !!} apenas com conteúdo confiável",
+      "layouts/componentes",
+      "slots"
+    ]
+  },
+  "migrations-seeders-factories": {
+    "lesson_title": "Migrations, seeders e factories",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o comando Artisan para criar uma migration.",
+    "starter": "php artisan make:___ create_tickets_table",
+    "required": [
+      "migration"
+    ],
+    "hint": "O nome do gerador é o mesmo nome do conceito estudado.",
+    "solution": "php artisan make:migration create_tickets_table",
+    "success": "Isso. Migrations registram mudanças estruturais do banco.",
+    "visual_steps": [
+      "Schema Builder",
+      "chaves estrangeiras",
+      "índices",
+      "rollback"
+    ]
+  },
+  "eloquent-models": {
+    "lesson_title": "Eloquent: Models, casts e mass assignment",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a propriedade que define atributos permitidos para preenchimento em massa.",
+    "starter": "protected $___ = ['title', 'description', 'status'];",
+    "required": [
+      "fillable"
+    ],
+    "hint": "Ela aparece muito em Models Eloquent.",
+    "solution": "protected $fillable = ['title', 'description', 'status'];",
+    "success": "Perfeito. $fillable limita quais campos podem ser preenchidos em massa.",
+    "visual_steps": [
+      "Conventions",
+      "$fillable/guarded",
+      "create/update",
+      "casts"
+    ]
+  },
+  "eloquent-relacionamentos": {
+    "lesson_title": "Relacionamentos e N+1",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "<?php\nclass Ticket extends Model\n{\n    public function solicitante()\n    {\n        return $this->___(User::class, 'user_id');\n    }\n\n    public function comentarios()\n    {\n        return $this->hasMany(Comment::class);\n    }\n}\n\n$tickets = Ticket::with('solicitante')->paginate(20);",
+    "required": [
+      "belongsTo"
+    ],
+    "hint": "Volte ao conceito “belongsTo, hasMany, belongsToMany” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "<?php\nclass Ticket extends Model\n{\n    public function solicitante()\n    {\n        return $this->belongsTo(User::class, 'user_id');\n    }\n\n    public function comentarios()\n    {\n        return $this->hasMany(Comment::class);\n    }\n}\n\n$tickets = Ticket::with('solicitante')->paginate(20);",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "belongsTo, hasMany, belongsToMany",
+      "eager loading with",
+      "withCount",
+      "N+1"
+    ]
+  },
+  "form-requests": {
+    "lesson_title": "Validação com Form Requests",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "php artisan make:request StoreTicketRequest\n\n<?php\npublic function rules(): array\n{\n    return [\n        'title' => ['required', 'string', ___],\n        'description' => ['required', 'string', 'max:5000'],\n    ];\n}",
+    "required": [
+      "'max:150'"
+    ],
+    "hint": "Volte ao conceito “make:request” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "php artisan make:request StoreTicketRequest\n\n<?php\npublic function rules(): array\n{\n    return [\n        'title' => ['required', 'string', 'max:150'],\n        'description' => ['required', 'string', 'max:5000'],\n    ];\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "make:request",
+      "rules",
+      "authorize",
+      "validated data"
+    ]
+  },
+  "autenticacao-starter-kit": {
+    "lesson_title": "Autenticação com starter kit oficial",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o middleware que exige usuário autenticado.",
+    "starter": "Route::get('/dashboard', DashboardController::class)\n    ->middleware('___');",
+    "required": [
+      "auth"
+    ],
+    "hint": "É o middleware padrão para rotas autenticadas.",
+    "solution": "Route::get('/dashboard', DashboardController::class)\n    ->middleware('auth');",
+    "success": "Certo. O middleware auth exige uma sessão autenticada.",
+    "visual_steps": [
+      "Starter kits oficiais atuais",
+      "para curso PHP-first, preferir Livewire",
+      "login, cadastro, reset, verificação de e-mail",
+      "hashing"
+    ]
+  },
+  "gates-policies": {
+    "lesson_title": "Autorização: Gates, Policies e middleware",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "php artisan make:policy ___ --model=Ticket\n\n<?php\npublic function update(User $user, Ticket $ticket): bool\n{\n    return $user->is_admin || $ticket->user_id === $user->id;\n}",
+    "required": [
+      "TicketPolicy"
+    ],
+    "hint": "Volte ao conceito “Autenticação ≠ autorização” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "php artisan make:policy TicketPolicy --model=Ticket\n\n<?php\npublic function update(User $user, Ticket $ticket): bool\n{\n    return $user->is_admin || $ticket->user_id === $user->id;\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Autenticação ≠ autorização",
+      "Policies por Model",
+      "Gates",
+      "can"
+    ]
+  },
+  "service-container-di": {
+    "lesson_title": "Service Container, Dependency Injection e Facades",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método usado para associar uma interface a uma implementação no container.",
+    "starter": "$this->app->___(\n    TicketRepositoryInterface::class,\n    EloquentTicketRepository::class\n);",
+    "required": [
+      "bind"
+    ],
+    "hint": "O verbo significa 'ligar/associar'.",
+    "solution": "$this->app->bind(\n    TicketRepositoryInterface::class,\n    EloquentTicketRepository::class\n);",
+    "success": "Boa. O container passa a saber qual implementação entregar para a interface.",
+    "visual_steps": [
+      "Container IoC",
+      "resolução automática",
+      "interfaces/bindings",
+      "constructor injection"
+    ]
+  },
+  "recursos-aplicacao": {
+    "lesson_title": "Coleções, paginação, storage, mail, notificações e filas",
+    "module_number": 7,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método Eloquent que retorna resultados paginados.",
+    "starter": "$tickets = Ticket::latest()->___(15);",
+    "required": [
+      "paginate"
+    ],
+    "hint": "Ele recebe a quantidade de itens por página.",
+    "solution": "$tickets = Ticket::latest()->paginate(15);",
+    "success": "Certo. Paginação evita carregar conjuntos enormes de uma vez.",
+    "visual_steps": [
+      "Collections essenciais",
+      "paginate",
+      "filesystem Storage",
+      "Mail/Notifications"
+    ]
+  },
+  "helpdesk-requisitos": {
+    "lesson_title": "Requisitos, personas, user stories e critérios de aceite",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a parte final de uma user story.",
+    "starter": "Como [persona], quero [ação], para [___].",
+    "required": [
+      "benefício"
+    ],
+    "hint": "A última parte explica por que a funcionalidade gera valor.",
+    "solution": "Como [persona], quero [ação], para [benefício].",
+    "success": "Isso. A user story liga pessoa, necessidade e valor.",
+    "visual_steps": [
+      "Admin, técnico, cliente/solicitante",
+      "casos de uso",
+      "escopo",
+      "estados"
+    ]
+  },
+  "helpdesk-der-migrations": {
+    "lesson_title": "DER, migrations e dados iniciais",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "users\ncategories\ntickets\ncomments\nticket_history\nattachments\n\n___\ntickets.technician_id -> users.id\ntickets.category_id -> categories.id",
+    "required": [
+      "tickets.user_id -> users.id"
+    ],
+    "hint": "Volte ao conceito “Entidades users/categories/tickets/comments/attachments/audit_logs” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "users\ncategories\ntickets\ncomments\nticket_history\nattachments\n\ntickets.user_id -> users.id\ntickets.technician_id -> users.id\ntickets.category_id -> categories.id",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Entidades users/categories/tickets/comments/attachments/audit_logs",
+      "FKs",
+      "índices",
+      "enums/casts"
+    ]
+  },
+  "helpdesk-models": {
+    "lesson_title": "Models, relacionamentos e status do domínio",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o relacionamento de Ticket para o usuário solicitante.",
+    "starter": "public function solicitante()\n{\n    return $this->___(User::class, 'user_id');\n}",
+    "required": [
+      "belongsTo"
+    ],
+    "hint": "O Ticket pertence a um usuário.",
+    "solution": "public function solicitante()\n{\n    return $this->belongsTo(User::class, 'user_id');\n}",
+    "success": "Certo. belongsTo representa o lado que contém a chave estrangeira.",
+    "visual_steps": [
+      "Relacionamentos Eloquent",
+      "enum/cast de status/prioridade",
+      "scopes",
+      "transições permitidas"
+    ]
+  },
+  "helpdesk-auth-policies": {
+    "lesson_title": "Login, perfis e Policies",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método do controller que dispara a verificação de Policy.",
+    "starter": "$this->___('assign', $ticket);",
+    "required": [
+      "authorize"
+    ],
+    "hint": "O verbo significa autorizar.",
+    "solution": "$this->authorize('assign', $ticket);",
+    "success": "Boa. A autorização precisa ser conferida no backend.",
+    "visual_steps": [
+      "Starter kit",
+      "papéis",
+      "Policy por ação",
+      "ownership"
+    ]
+  },
+  "helpdesk-crud": {
+    "lesson_title": "CRUD de chamados com Form Requests",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "___('tickets', TicketController::class)\n    ->middleware('auth');\n\npublic function store(StoreTicketRequest $request)\n{\n    $ticket = $request->user()\n        ->tickets()\n        ->create($request->validated());\n\n    return redirect()->route('tickets.show', $ticket);\n}",
+    "required": [
+      "Route::resource"
+    ],
+    "hint": "Volte ao conceito “Resource controller” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "Route::resource('tickets', TicketController::class)\n    ->middleware('auth');\n\npublic function store(StoreTicketRequest $request)\n{\n    $ticket = $request->user()\n        ->tickets()\n        ->create($request->validated());\n\n    return redirect()->route('tickets.show', $ticket);\n}",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Resource controller",
+      "Store/Update Request",
+      "validated data",
+      "transação quando houver operações múltiplas"
+    ]
+  },
+  "helpdesk-comentarios-auditoria": {
+    "lesson_title": "Comentários, histórico e auditoria",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "Evento: comentario_criado\nQuem: user_id\nQuando: created_at\nRecurso: ticket_id\nContexto: dados suficientes para auditoria,\n___",
+    "required": [
+      "sem registrar senha, token ou segredo."
+    ],
+    "hint": "Volte ao conceito “Comentários” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "Evento: comentario_criado\nQuem: user_id\nQuando: created_at\nRecurso: ticket_id\nContexto: dados suficientes para auditoria,\nsem registrar senha, token ou segredo.",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Comentários",
+      "autoria/data",
+      "histórico de mudança de status/atribuição",
+      "audit log"
+    ]
+  },
+  "helpdesk-workflow-status": {
+    "lesson_title": "Atribuição e máquina de estados",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a exceção usada quando uma transição de estado não é permitida.",
+    "starter": "if (! $this->canTransition($from, $to)) {\n    throw new ___('Transição inválida');\n}",
+    "required": [
+      "DomainException"
+    ],
+    "hint": "A falha representa uma regra do domínio, não um erro de sintaxe.",
+    "solution": "if (! $this->canTransition($from, $to)) {\n    throw new DomainException('Transição inválida');\n}",
+    "success": "Certo. A exceção comunica que a regra de negócio foi violada.",
+    "visual_steps": [
+      "Fluxo aberto → em atendimento → resolvido/fechado",
+      "transições válidas",
+      "concorrência básica",
+      "autorização"
+    ]
+  },
+  "helpdesk-dashboard": {
+    "lesson_title": "Busca, filtros, paginação e Dashboard",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o método que limita a listagem a páginas.",
+    "starter": "$tickets = Ticket::with(['solicitante', 'categoria'])\n    ->latest()\n    ->___(20);",
+    "required": [
+      "paginate"
+    ],
+    "hint": "Ele evita trazer todos os chamados de uma vez.",
+    "solution": "$tickets = Ticket::with(['solicitante', 'categoria'])\n    ->latest()\n    ->paginate(20);",
+    "success": "Isso. Paginação e eager loading ajudam a manter o dashboard eficiente.",
+    "visual_steps": [
+      "Filtros por status/categoria/técnico",
+      "query scopes",
+      "paginação",
+      "agregações"
+    ]
+  },
+  "helpdesk-anexos-notificacoes": {
+    "lesson_title": "Anexos e notificações",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "$path = $request->file('attachment')\n    ->store('ticket-attachments', 'local');\n\n$technician___(\n    new TicketAssigned($ticket)\n);",
+    "required": [
+      "->notify"
+    ],
+    "hint": "Volte ao conceito “Upload seguro” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "$path = $request->file('attachment')\n    ->store('ticket-attachments', 'local');\n\n$technician->notify(\n    new TicketAssigned($ticket)\n);",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Upload seguro",
+      "Storage",
+      "autorização de download",
+      "Notification/Mail"
+    ]
+  },
+  "helpdesk-testes": {
+    "lesson_title": "Testes dos fluxos críticos",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "test('cliente nao pode editar chamado de outro cliente', function () {\n    $owner = User::factory()->create();\n    $stranger = User::factory()->create();\n    $ticket = Ticket::factory()->for($owner)->create();\n\n    $this->actingAs($stranger)\n        ->put(route('tickets.update', $ticket), [])\n        ___;\n});",
+    "required": [
+      "->assertForbidden()"
+    ],
+    "hint": "Volte ao conceito “Feature tests para abrir, editar, autorizar, atribuir e resolver” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "test('cliente nao pode editar chamado de outro cliente', function () {\n    $owner = User::factory()->create();\n    $stranger = User::factory()->create();\n    $ticket = Ticket::factory()->for($owner)->create();\n\n    $this->actingAs($stranger)\n        ->put(route('tickets.update', $ticket), [])\n        ->assertForbidden();\n});",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Feature tests para abrir, editar, autorizar, atribuir e resolver",
+      "factories",
+      "banco de teste",
+      "happy path + negações"
+    ]
+  },
+  "helpdesk-revisao-entrega": {
+    "lesson_title": "Revisão de segurança, performance e entrega",
+    "module_number": 8,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete a configuração adequada para debug público em produção.",
+    "starter": "APP_ENV=production\nAPP_DEBUG=___",
+    "required": [
+      "false"
+    ],
+    "hint": "Detalhes de exceção não devem ser exibidos publicamente.",
+    "solution": "APP_ENV=production\nAPP_DEBUG=false",
+    "success": "Certo. Em produção, erros detalhados ficam nos logs, não na tela do usuário.",
+    "visual_steps": [
+      "CSRF",
+      "XSS",
+      "mass assignment",
+      "SQL injection/Eloquent"
+    ]
+  },
+  "git-essencial": {
+    "lesson_title": "Git essencial e histórico confiável",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "git init\ngit status\ngit add .\n___ -m \"feat: cria cadastro de chamados\"\ngit log --oneline\ngit switch -c feature/filtro-status",
+    "required": [
+      "git commit"
+    ],
+    "hint": "Volte ao conceito “init, status, add, commit, log, .gitignore, branches, merge/rebase em nível introdutório” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "git init\ngit status\ngit add .\ngit commit -m \"feat: cria cadastro de chamados\"\ngit log --oneline\ngit switch -c feature/filtro-status",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "init, status, add, commit, log, .gitignore, branches, merge/rebase em nível introdutório",
+      "mensagens de commit úteis",
+      "nunca versionar segredo."
+    ]
+  },
+  "github-pull-request": {
+    "lesson_title": "GitHub, Pull Request e code review",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "git remote add origin <repositorio>\ngit push -u origin feature/filtro-status\n\nFluxo:\nbranch -> commits pequenos -> push -> ___\n-> review -> ajustes -> merge",
+    "required": [
+      "Pull Request"
+    ],
+    "hint": "Volte ao conceito “Remote” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "git remote add origin <repositorio>\ngit push -u origin feature/filtro-status\n\nFluxo:\nbranch -> commits pequenos -> push -> Pull Request\n-> review -> ajustes -> merge",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Remote",
+      "push/pull",
+      "PR",
+      "revisão"
+    ]
+  },
+  "linux-terminal": {
+    "lesson_title": "Terminal Linux e ambiente de servidor",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "pwd\nls -la\ncd /var/www/app\ncp .env.example .env\n___ storage/logs/laravel.log\n\n# Evite operar como root sem necessidade.",
+    "required": [
+      "tail -f"
+    ],
+    "hint": "Volte ao conceito “Diretórios” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "pwd\nls -la\ncd /var/www/app\ncp .env.example .env\ntail -f storage/logs/laravel.log\n\n# Evite operar como root sem necessidade.",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Diretórios",
+      "pwd",
+      "ls",
+      "cd"
+    ]
+  },
+  "rest-json": {
+    "lesson_title": "HTTP e APIs REST com JSON",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "GET    /api/tickets\nPOST   /api/tickets\nGET    /api/tickets/42\nPATCH  /api/tickets/42\nDELETE /api/tickets/42\n\n___\n401 Unauthenticated\n403 Forbidden\n404 Not Found\n422 Unprocessable Content",
+    "required": [
+      "201 Created"
+    ],
+    "hint": "Volte ao conceito “Recursos, URIs, GET/POST/PUT/PATCH/DELETE” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "GET    /api/tickets\nPOST   /api/tickets\nGET    /api/tickets/42\nPATCH  /api/tickets/42\nDELETE /api/tickets/42\n\n201 Created\n401 Unauthenticated\n403 Forbidden\n404 Not Found\n422 Unprocessable Content",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Recursos, URIs, GET/POST/PUT/PATCH/DELETE",
+      "200/201/204/400/401/403/404/422/500",
+      "JSON",
+      "idempotência"
+    ]
+  },
+  "laravel-api-sanctum": {
+    "lesson_title": "API Laravel, API Resources e Sanctum",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "php artisan install:api\n\nRoute::middleware('___')->get(\n    '/tickets',\n    fn (Request $request) => TicketResource::collection(\n        Ticket::latest()->paginate()\n    )\n);",
+    "required": [
+      "auth:sanctum"
+    ],
+    "hint": "Volte ao conceito “routes/api.php” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "php artisan install:api\n\nRoute::middleware('auth:sanctum')->get(\n    '/tickets',\n    fn (Request $request) => TicketResource::collection(\n        Ticket::latest()->paginate()\n    )\n);",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "routes/api.php",
+      "install:api",
+      "API Resources",
+      "validação"
+    ]
+  },
+  "testes-automatizados": {
+    "lesson_title": "Testes automatizados: PHPUnit/Pest e Feature Tests",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "___\n\ntest('usuario autenticado cria ticket', function () {\n    $user = User::factory()->create();\n\n    $this->actingAs($user)\n        ->post('/tickets', [\n            'title' => 'Sem acesso a rede',\n            'description' => 'Falha desde as 08:00',\n        ])\n        ->assertRedirect();\n});",
+    "required": [
+      "php artisan test"
+    ],
+    "hint": "Volte ao conceito “Unit x Feature” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "php artisan test\n\ntest('usuario autenticado cria ticket', function () {\n    $user = User::factory()->create();\n\n    $this->actingAs($user)\n        ->post('/tickets', [\n            'title' => 'Sem acesso a rede',\n            'description' => 'Falha desde as 08:00',\n        ])\n        ->assertRedirect();\n});",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Unit x Feature",
+      "Arrange-Act-Assert",
+      "factories",
+      "database refresh"
+    ]
+  },
+  "qualidade-estatica": {
+    "lesson_title": "Qualidade: Pint, PHPStan e revisão",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "___\nphp artisan test\n\n# PHPStan/Larastan:\n# comece com configuracao moderada e eleve o nivel\n# conforme a equipe corrige os problemas encontrados.",
+    "required": [
+      "vendor/bin/pint"
+    ],
+    "hint": "Volte ao conceito “PSR-12” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "vendor/bin/pint\nphp artisan test\n\n# PHPStan/Larastan:\n# comece com configuracao moderada e eleve o nivel\n# conforme a equipe corrige os problemas encontrados.",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "PSR-12",
+      "Laravel Pint",
+      "PHPStan/Larastan em nível progressivo",
+      "análise estática"
+    ]
+  },
+  "docker-basico": {
+    "lesson_title": "Docker e ambientes reproduzíveis",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "services:\n  app:\n    build: .\n    volumes:\n      - .:/var/www/html\n\n  db:\n    image: mysql:8\n    environment:\n      MYSQL_DATABASE: helpdesk\n    volumes:\n      - ___\n\nvolumes:\n  db_data:",
+    "required": [
+      "db_data:/var/lib/mysql"
+    ],
+    "hint": "Volte ao conceito “Imagem, container, volume, rede” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "services:\n  app:\n    build: .\n    volumes:\n      - .:/var/www/html\n\n  db:\n    image: mysql:8\n    environment:\n      MYSQL_DATABASE: helpdesk\n    volumes:\n      - db_data:/var/lib/mysql\n\nvolumes:\n  db_data:",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Imagem, container, volume, rede",
+      "Dockerfile",
+      "Compose",
+      "serviços app/banco"
+    ]
+  },
+  "deploy-producao": {
+    "lesson_title": "Deploy, segurança operacional e backups",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "Checklist:\n1. instalar dependencias de producao\n2. configurar .env sem debug\n3. executar migrations com backup\n4. compilar assets\n5. configurar servidor web/PHP\n6. iniciar workers e scheduler\n7. testar health check\n8. ___",
+    "required": [
+      "validar backup e rollback"
+    ],
+    "hint": "Volte ao conceito “Servidor web/PHP-FPM em alto nível” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "Checklist:\n1. instalar dependencias de producao\n2. configurar .env sem debug\n3. executar migrations com backup\n4. compilar assets\n5. configurar servidor web/PHP\n6. iniciar workers e scheduler\n7. testar health check\n8. validar backup e rollback",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Servidor web/PHP-FPM em alto nível",
+      ".env",
+      "APP_ENV/debug",
+      "HTTPS"
+    ]
+  },
+  "ci-cd-portfolio": {
+    "lesson_title": "CI/CD, logs, portfólio e preparação para vaga",
+    "module_number": 9,
+    "title": "⚡ Desafio Relâmpago",
+    "prompt": "Complete o trecho substituído por ___ no exemplo. Você pode editar somente o ponto faltante e usar Ctrl+Enter para verificar.",
+    "starter": "Pipeline minimo:\n- instalar PHP/Composer\n- instalar dependencias\n- formatacao/análise\n- testes\n- build dos assets\n- ___\n\nREADME:\nproblema -> requisitos -> arquitetura -> instalacao\n-> testes -> seguranca -> screenshots sem dados sensiveis",
+    "required": [
+      "somente depois: deploy"
+    ],
+    "hint": "Volte ao conceito “Pipeline GitHub Actions para install/lint/test” e observe qual palavra, comando ou trecho faz o exemplo cumprir essa ideia.",
+    "solution": "Pipeline minimo:\n- instalar PHP/Composer\n- instalar dependencias\n- formatacao/análise\n- testes\n- build dos assets\n- somente depois: deploy\n\nREADME:\nproblema -> requisitos -> arquitetura -> instalacao\n-> testes -> seguranca -> screenshots sem dados sensiveis",
+    "success": "Boa! Você recuperou o ponto-chave do exemplo e conectou conceito com código.",
+    "visual_steps": [
+      "Pipeline GitHub Actions para install/lint/test",
+      "logs e monitoramento",
+      "README profissional",
+      "screenshots sem dados sensíveis"
+    ]
+  }
+}
