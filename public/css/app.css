@@ -1898,3 +1898,368 @@ html[data-theme="light"] .security-note {
     font-size: .74rem;
   }
 }
+/* ==========================================================================
+   Menu compacto do usuário autenticado
+   ========================================================================== */
+
+.user-account-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+}
+
+/* Remove a setinha padrão do <details> */
+.user-account-trigger {
+    list-style: none;
+}
+
+.user-account-trigger::-webkit-details-marker {
+    display: none;
+}
+
+.user-account-trigger::marker {
+    display: none;
+    content: "";
+}
+
+/* Botão fechado: L Luciano 15 XP */
+.user-account-trigger {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px 5px 6px;
+
+    border: 1px solid var(--line);
+    border-radius: 12px;
+
+    background: var(--panel);
+    color: var(--text);
+
+    cursor: pointer;
+    user-select: none;
+
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        transform .18s ease;
+}
+
+.user-account-trigger:hover {
+    border-color: var(--accent);
+    background: var(--panel-raised);
+    transform: translateY(-1px);
+}
+
+/* Avatar pequeno */
+.user-avatar {
+    width: 30px;
+    height: 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 30px;
+
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+    border-radius: 9px;
+
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+
+    font-size: .82rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* Nome + XP no botão */
+.user-trigger-copy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.user-trigger-copy strong {
+    max-width: 110px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    color: var(--text);
+    font-size: .82rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.user-trigger-copy small {
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Pequena seta */
+.user-menu-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-left: 1px;
+
+    color: var(--text-muted);
+    font-size: .72rem;
+    line-height: 1;
+
+    transition: transform .18s ease;
+}
+
+.user-account-menu[open] .user-menu-chevron {
+    transform: rotate(180deg);
+}
+
+/* ==========================================================================
+   Dropdown aberto
+   ========================================================================== */
+
+.user-account-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 200;
+
+    width: 300px;
+    max-width: calc(100vw - 24px);
+
+    padding: 14px;
+
+    border: 1px solid var(--line);
+    border-radius: 14px;
+
+    background: color-mix(in srgb, var(--panel) 97%, var(--bg));
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, .30),
+        0 0 0 1px rgba(255, 255, 255, .02);
+}
+
+/* Linha com avatar, nome e e-mail */
+.user-account-identity {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+
+    border-bottom: 1px solid var(--line);
+}
+
+.user-avatar-large {
+    width: 42px;
+    height: 42px;
+
+    flex-basis: 42px;
+
+    border-radius: 11px;
+
+    font-size: 1rem;
+}
+
+.user-account-identity > div {
+    min-width: 0;
+    flex: 1;
+}
+
+.user-account-identity strong {
+    display: block;
+
+    margin-bottom: 2px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: var(--text);
+    font-size: .88rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.user-account-identity span:not(.user-avatar) {
+    display: block;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: var(--text-muted);
+    font-size: .72rem;
+    line-height: 1.3;
+}
+
+/* XP + status do e-mail */
+.user-account-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    margin-bottom: 11px;
+}
+
+.user-account-meta > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    min-height: 27px;
+    padding: 4px 8px;
+
+    border: 1px solid var(--line);
+    border-radius: 999px;
+
+    background: var(--panel-raised);
+    color: var(--text-muted);
+
+    font-size: .69rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.user-account-meta > span:first-child {
+    color: var(--accent-strong);
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--line));
+    background: var(--accent-soft);
+}
+
+.user-account-meta .user-email-ok {
+    color: var(--success-strong);
+    border-color: color-mix(in srgb, var(--success) 32%, var(--line));
+    background: var(--success-soft);
+}
+
+.user-account-meta .user-email-pending {
+    color: var(--warning);
+}
+
+/* Links */
+.user-account-links {
+    display: grid;
+    gap: 4px;
+
+    margin-bottom: 10px;
+}
+
+.user-account-links a {
+    display: flex;
+    align-items: center;
+
+    min-height: 38px;
+    padding: 8px 10px;
+
+    border-radius: 9px;
+
+    color: var(--text-muted);
+    text-decoration: none;
+
+    font-size: .79rem;
+    font-weight: 700;
+
+    transition:
+        color .16s ease,
+        background .16s ease;
+}
+
+.user-account-links a:hover {
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+}
+
+/* Logout */
+.user-account-logout {
+    margin: 0;
+    padding-top: 10px;
+
+    border-top: 1px solid var(--line);
+}
+
+.user-account-logout button {
+    width: 100%;
+    min-height: 37px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 7px 12px;
+
+    border: 1px solid var(--line);
+    border-radius: 9px;
+
+    background: var(--panel-raised);
+    color: var(--text-muted);
+
+    font-family: inherit;
+    font-size: .78rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .16s ease,
+        color .16s ease,
+        border-color .16s ease;
+}
+
+.user-account-logout button:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+
+/* ==========================================================================
+   Menu do usuário - responsivo
+   ========================================================================== */
+
+@media (max-width: 760px) {
+
+    .user-trigger-copy small {
+        display: none;
+    }
+
+    .user-trigger-copy strong {
+        max-width: 90px;
+    }
+
+    .user-account-dropdown {
+        position: fixed;
+
+        top: 74px;
+        right: 12px;
+        left: 12px;
+
+        width: auto;
+        max-width: none;
+    }
+}
+
+@media (max-width: 470px) {
+
+    .user-trigger-copy strong {
+        max-width: 72px;
+    }
+
+    .user-account-trigger {
+        padding-right: 7px;
+        gap: 6px;
+    }
+
+    .user-account-dropdown {
+        padding: 12px;
+    }
+}
