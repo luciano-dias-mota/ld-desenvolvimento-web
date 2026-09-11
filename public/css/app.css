@@ -1,5 +1,5 @@
 /* ========================================================================== 
-   PHP Quest — Gamer Tech UI
+   LD Desenvolvimento Web — Gamer Tech UI
    Dark: laranja + prata + verde + preto
    Light: verde + prata + branco + azul
    ========================================================================== */
@@ -1075,8 +1075,149 @@ html[data-theme="light"] .btn-success { color: #fff; }
 }
 
 
-/* ===== V6: visitante, Google e verificação de e-mail ===== */
-.btn-block{width:100%;justify-content:center}.auth-box-wide{max-width:520px}.google-access{display:flex;justify-content:center;margin:12px 0 4px;min-height:44px}.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted)}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}.auth-divider span{text-transform:uppercase;font-size:.72rem;letter-spacing:.16em}.guest-access-card{margin-top:22px;padding:18px;border:1px solid rgba(249,115,22,.35);border-radius:14px;background:rgba(249,115,22,.06)}.guest-access-card strong{display:block;margin-bottom:6px}.guest-access-card p{margin:0 0 14px;color:var(--muted);font-size:.92rem;line-height:1.5}.auth-link-line{text-align:center;margin-top:16px}.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.guest-banner,.verification-banner{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:14px 16px;margin:18px 0 24px;border-radius:12px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.08)}.guest-banner strong,.verification-banner strong{white-space:nowrap}.guest-banner span{flex:1;color:var(--muted)}.guest-banner a{font-weight:700}.verification-banner p{margin:4px 0 0;color:var(--muted)}.guest-inline-note{padding:12px 14px;margin:12px 0 20px;border-radius:10px;border:1px solid rgba(34,197,94,.28);background:rgba(34,197,94,.07);color:var(--text)}.home-guest-form{display:inline-flex;margin:0}@media(max-width:720px){.guest-banner,.verification-banner{align-items:flex-start;flex-direction:column}.home-guest-form{width:100%}.home-guest-form .btn{width:100%}.google-access iframe{max-width:100%!important}}
+/* ========================================================================== 
+   Acesso: visitante, Google e verificação de e-mail
+   ========================================================================== */
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+.auth-box-wide {
+  max-width: 520px;
+}
+
+.google-access {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+  margin: 12px 0 4px;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--text-muted);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.auth-divider span {
+  font-size: .72rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.guest-access-card {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: 14px;
+  background: var(--accent-soft);
+}
+
+.guest-access-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.guest-access-card p {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+
+.auth-link-line {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.guest-banner,
+.verification-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  margin: 18px 0 24px;
+  border: 1px solid color-mix(in srgb, var(--success) 35%, var(--line));
+  border-radius: 12px;
+  background: var(--success-soft);
+}
+
+.guest-banner strong,
+.verification-banner strong {
+  white-space: nowrap;
+}
+
+.guest-banner span {
+  flex: 1;
+  color: var(--text-muted);
+}
+
+.guest-banner a {
+  font-weight: 700;
+}
+
+.verification-banner p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.guest-inline-note {
+  padding: 12px 14px;
+  margin: 12px 0 20px;
+  border: 1px solid color-mix(in srgb, var(--success) 28%, var(--line));
+  border-radius: 10px;
+  background: var(--success-soft);
+  color: var(--text);
+}
+
+.home-guest-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .guest-banner,
+  .verification-banner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-guest-form {
+    width: 100%;
+  }
+
+  .home-guest-form .btn {
+    width: 100%;
+  }
+
+  .google-access iframe {
+    max-width: 100% !important;
+  }
+}
 
 
 /* ==========================================================================
@@ -1549,5 +1690,211 @@ html[data-theme="light"] .btn-success { color: #fff; }
   .mini-editor-input {
     min-height: 260px;
     font-size: .86rem;
+  }
+}
+
+/* ========================================================================== 
+   Recuperação de senha
+   ========================================================================== */
+.security-note {
+  margin-top: 18px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--info);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel-raised) 55%, transparent);
+}
+
+.security-note strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--silver);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.security-note p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.back-login-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.auth-box .btn-back-login {
+  width: auto;
+  min-height: 36px;
+  padding: 7px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--panel-raised);
+  color: var(--silver);
+  font-size: .82rem;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.auth-box .btn-back-login:hover {
+  transform: translateY(-1px);
+  border-color: var(--success);
+  background: var(--success-soft);
+  color: var(--success-strong);
+}
+
+html[data-theme="light"] .security-note {
+  background: var(--panel-raised);
+}
+
+/* ========================================================================== 
+   Login compacto e equilibrado
+   ========================================================================== */
+.auth-box-login {
+  padding: 27px 30px;
+}
+
+.auth-box-login .eyebrow {
+  margin-bottom: 7px;
+  font-size: .76rem;
+}
+
+.auth-box-login h1 {
+  margin-bottom: 7px;
+  font-size: 1.95rem;
+}
+
+.auth-box-login .auth-subtitle {
+  margin-bottom: 17px;
+  font-size: .94rem;
+  line-height: 1.45;
+}
+
+.auth-box-login .google-access {
+  min-height: 42px;
+  margin: 8px 0 3px;
+}
+
+.auth-box-login .auth-divider {
+  margin: 11px 0;
+}
+
+.auth-box-login .field {
+  margin-bottom: 13px;
+}
+
+.auth-box-login .field label {
+  margin-bottom: 5px;
+  font-size: .80rem;
+}
+
+.auth-box-login .field input {
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: .92rem;
+}
+
+.auth-box-login .btn {
+  min-height: 42px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: .88rem;
+}
+
+.auth-box-login .forgot-password-link {
+  margin-top: 8px;
+  margin-bottom: 20px;
+  text-align: right;
+  font-size: .76rem;
+  line-height: 1.2;
+}
+
+.auth-box-login .forgot-password-link a {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.auth-box-login .forgot-password-link a:hover {
+  color: var(--accent-strong);
+}
+
+.auth-box-login .auth-link-line {
+  margin-top: 13px;
+  margin-bottom: 0;
+  font-size: .84rem;
+}
+
+.auth-box-login .guest-access-card {
+  margin-top: 15px;
+  padding: 14px 16px;
+}
+
+.auth-box-login .guest-access-card strong {
+  margin-bottom: 3px;
+  font-size: .90rem;
+}
+
+.auth-box-login .guest-access-card p {
+  margin-bottom: 10px;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+
+/* Desktop com pouca altura: reduz apenas o necessário para evitar rolagem. */
+@media (min-width: 901px) and (max-height: 850px) {
+  .auth-shell {
+    padding-top: 16px;
+    padding-bottom: 24px;
+  }
+
+  .auth-topbar {
+    min-height: 64px;
+  }
+
+  .auth-box-login {
+    padding: 23px 27px;
+  }
+
+  .auth-box-login h1 {
+    font-size: 1.85rem;
+  }
+
+  .auth-box-login .auth-subtitle {
+    margin-bottom: 13px;
+  }
+
+  .auth-box-login .google-access {
+    margin-top: 5px;
+  }
+
+  .auth-box-login .auth-divider {
+    margin: 8px 0;
+  }
+
+  .auth-box-login .field {
+    margin-bottom: 10px;
+  }
+
+  .auth-box-login .guest-access-card {
+    margin-top: 11px;
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 470px) {
+  .auth-box .btn-back-login {
+    width: 100%;
+  }
+
+  .auth-box-login {
+    padding: 24px 20px;
+  }
+
+  .auth-box-login .forgot-password-link {
+    font-size: .74rem;
   }
 }
