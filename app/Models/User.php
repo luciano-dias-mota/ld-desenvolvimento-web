@@ -29,6 +29,7 @@ class User extends Model
              LIMIT 1'
         );
         $stmt->execute([strtolower(trim($email))]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
@@ -42,6 +43,7 @@ class User extends Model
              LIMIT 1'
         );
         $stmt->execute([$googleSub]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
@@ -55,7 +57,44 @@ class User extends Model
              LIMIT 1'
         );
         $stmt->execute([$id]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Dados seguros para a página de perfil.
+     *
+     * Não retorna password nem google_sub. Para informar os métodos de acesso,
+     * expõe apenas dois indicadores booleanos.
+     */
+    public static function findProfileById(int $id): ?array
+    {
+        $db = static::getDB();
+        $stmt = $db->prepare(
+            "SELECT
+                id,
+                name,
+                email,
+                email_verified_at,
+                role,
+                xp,
+                created_at,
+                updated_at,
+                CASE WHEN password IS NOT NULL AND password <> '' THEN 1 ELSE 0 END AS has_password,
+                CASE WHEN google_sub IS NOT NULL AND google_sub <> '' THEN 1 ELSE 0 END AS has_google
+             FROM users
+             WHERE id = ?
+             LIMIT 1"
+        );
+        $stmt->execute([$id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+        if ($user !== null) {
+            $user['has_password'] = (bool) $user['has_password'];
+            $user['has_google'] = (bool) $user['has_google'];
+        }
+
+        return $user;
     }
 
     public static function emailExists(string $email): bool
@@ -63,6 +102,7 @@ class User extends Model
         $db = static::getDB();
         $stmt = $db->prepare('SELECT 1 FROM users WHERE email = ? LIMIT 1');
         $stmt->execute([strtolower(trim($email))]);
+
         return (bool) $stmt->fetchColumn();
     }
 
@@ -80,13 +120,17 @@ class User extends Model
         $params[] = $userId;
 
         $stmt = $db->prepare($sql);
+
         return $stmt->execute($params);
     }
 
     public static function markEmailVerified(int $userId): bool
     {
         $db = static::getDB();
-        $stmt = $db->prepare('UPDATE users SET email_verified_at = COALESCE(email_verified_at, NOW()) WHERE id = ?');
+        $stmt = $db->prepare(
+            'UPDATE users SET email_verified_at = COALESCE(email_verified_at, NOW()) WHERE id = ?'
+        );
+
         return $stmt->execute([$userId]);
     }
 }

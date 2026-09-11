@@ -26,6 +26,16 @@ $router->post('/verificacao-email/reenviar', 'AuthController@resendVerification'
 // Dashboard / mapa: autenticado OU visitante
 $router->get('/dashboard', 'DashboardController@index')->middleware('learning');
 
+// Recuperação de senha (público / somente deslogado)
+$router->get('/esqueci-senha', 'PasswordResetController@showRequestForm')->middleware('guest');
+$router->post('/esqueci-senha', 'PasswordResetController@requestLink')->middleware('guest');
+$router->get('/redefinir-senha/{token}', 'PasswordResetController@showResetForm')->middleware('guest');
+$router->post('/redefinir-senha/{token}', 'PasswordResetController@reset')->middleware('guest');
+
+// Perfil do usuário autenticado
+$router->get('/perfil', 'ProfileController@index')->middleware('auth');
+
+
 // Cursos
 $router->get('/cursos/{courseSlug}/{moduleSlug}', 'CourseController@showModule')->middleware('learning');
 $router->get('/cursos/{courseSlug}/{moduleSlug}/prova', 'ModuleTestController@show')->middleware('learning');

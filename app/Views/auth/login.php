@@ -11,7 +11,13 @@
     <form action="<?= url('/login') ?>" method="POST">
         <?= csrf_field() ?>
         <div class="field"><label for="email">E-mail</label><input type="email" id="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required></div>
-        <div class="field"><label for="password">Senha</label><input type="password" id="password" name="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
+        <div class="field">
+            <div class="field-label-row">
+                <label for="password">Senha</label>
+                <a href="<?= url('/esqueci-senha') ?>" class="forgot-password-link">Esqueceu sua senha?</a>
+            </div>
+            <input type="password" id="password" name="password" placeholder="Digite sua senha" autocomplete="current-password" required>
+        </div>
         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
     </form>
 
